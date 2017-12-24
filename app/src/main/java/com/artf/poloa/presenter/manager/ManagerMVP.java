@@ -25,14 +25,14 @@ public interface ManagerMVP {
     }
 
     interface ThreadReceiver {
-        void setRmiData(double rmiValue, double rmiSingal);
-        void setTradeHistory24H(double trend24H);
-        void setTradeHistory15m(double trend15m);
-        void setStochasticData(double rmiValue, double rmiSingal);
+        void setRmiData(String ccName, double rmiValue, double rmiSingal);
+        void setTradeHistory24H(String ccName, double trend24H);
+        void setTradeHistory15m(String ccName, double trend15m);
+        void setStochasticData(String ccName, double rmiValue, double rmiSingal);
         void setView(ManagerMVP.View view);
         void startThread();
         void onStop();
-        void setLastValue(double close);
+        void setLastValue(String ccName, double close);
     }
 
 

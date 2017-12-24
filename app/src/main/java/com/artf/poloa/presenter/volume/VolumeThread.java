@@ -1,14 +1,20 @@
 package com.artf.poloa.presenter.volume;
 
 
+import android.util.Log;
+
 import com.artf.poloa.data.entity.PublicTradeHistory;
+import com.artf.poloa.data.entity.TradeObject;
 import com.artf.poloa.data.entity.WrapJSONArray;
 import com.artf.poloa.presenter.manager.ManagerMVP;
+import com.artf.poloa.utility.Settings;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -24,11 +30,13 @@ public class VolumeThread extends Thread implements VolumeMVP.Thread, VolumeMVP.
     private ManagerMVP.ThreadReceiver threadReceiver;
     private LoopTradeHistory24H loopTradeHistory24H = new LoopTradeHistory24H();
     private LoopTradeHistory15m loopTradeHistory15m = new LoopTradeHistory15m();
+    private HashMap<String, TradeObject> ccMap;
 
 
     public VolumeThread(VolumeMVP.Presenter presenter) {
         this.presenter = presenter;
         presenter.setThread(this);
+        ccMap = Settings.Trade.CC_LIST;
     }
 
 
@@ -44,15 +52,18 @@ public class VolumeThread extends Thread implements VolumeMVP.Thread, VolumeMVP.
 
     @Override
     public void returnTradeHistory(WrapJSONArray wrapJSONArray) {
-        publicTradeHistoryList.clear();
-        setData(wrapJSONArray.jsonArray);
-        switch (wrapJSONArray.periodTime) {
-            case PERIOD_30M:
-                threadReceiver.setTradeHistory15m(getVolumeRate(publicTradeHistoryList));
-                break;
-            case PERIOD_1D:
-                threadReceiver.setTradeHistory24H(getVolumeRate(publicTradeHistoryList));
-                break;
+        synchronized (this) {
+            String ccName = wrapJSONArray.ccName;
+            publicTradeHistoryList.clear();
+            setData(wrapJSONArray.jsonArray);
+            switch (wrapJSONArray.periodTime) {
+                case PERIOD_30M:
+                    threadReceiver.setTradeHistory15m(ccName, getVolumeRate(publicTradeHistoryList));
+                    break;
+                case PERIOD_1D:
+                    threadReceiver.setTradeHistory24H(ccName, getVolumeRate(publicTradeHistoryList));
+                    break;
+            }
         }
     }
 
@@ -100,13 +111,31 @@ public class VolumeThread extends Thread implements VolumeMVP.Thread, VolumeMVP.
 
     private class LoopTradeHistory24H extends TimerTask {
         public void run() {
-            presenter.returnTradeHistory(PERIOD_1D);
+            Set<String> keys = ccMap.keySet();
+            for (String key : keys) {
+                presenter.returnTradeHistory(key, PERIOD_1D);
+                Log.i(VolumeThread.class.getSimpleName() , key);
+                try {
+                    Thread.sleep(5001L);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
     private class LoopTradeHistory15m extends TimerTask {
         public void run() {
-            presenter.returnTradeHistory(PERIOD_30M);
+            Set<String> keys = ccMap.keySet();
+            for (String key : keys) {
+                presenter.returnTradeHistory(key, PERIOD_30M);
+                Log.i(VolumeThread.class.getSimpleName() , key);
+                try {
+                    Thread.sleep(5001L);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 

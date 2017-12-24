@@ -10,6 +10,8 @@ public class WrapJSONArray {
 
     public JsonArray jsonArray;
     public int periodTime;
+    public String ccName;
+
 
     public WrapJSONArray(JsonArray jsonArrayString) {
         jsonArray = jsonArrayString;

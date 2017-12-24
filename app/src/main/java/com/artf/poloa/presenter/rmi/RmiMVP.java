@@ -2,7 +2,6 @@ package com.artf.poloa.presenter.rmi;
 
 import com.artf.poloa.data.entity.WrapJSONArray;
 import com.artf.poloa.presenter.manager.ManagerMVP;
-import com.google.gson.JsonArray;
 
 import io.reactivex.Observable;
 
@@ -14,7 +13,7 @@ public interface RmiMVP {
     }
 
     interface Thread {
-        void returnChartData(JsonArray jsonArray);
+        void returnChartData(WrapJSONArray jsonArray);
     }
 
     interface ThreadUI {
@@ -25,12 +24,12 @@ public interface RmiMVP {
 
 
     interface Presenter {
-        void returnChartData(int timePeriod);
+        void returnChartData(String ccName, int timePeriod);
         void setThread(RmiMVP.Thread thread);
         void onStop();
     }
 
     interface Model {
-        Observable<WrapJSONArray> returnChartData(int timePeriod);
+        Observable<WrapJSONArray> returnChartData(String ccName, int timePeriod);;
     }
 }

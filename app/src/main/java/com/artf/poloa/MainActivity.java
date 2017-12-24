@@ -30,8 +30,8 @@ public class MainActivity extends AppCompatActivity implements ManagerMVP.View {
         managerThreadReceiver.setView(this);
         managerThreadReceiver.startThread();
 
-        volumeThread.setDataReciver(managerThreadReceiver);
-        volumeThread.startThread();
+//        volumeThread.setDataReciver(managerThreadReceiver);
+//        volumeThread.startThread();
 
         rmiThread.setDataReciver(managerThreadReceiver);
         rmiThread.startThread();

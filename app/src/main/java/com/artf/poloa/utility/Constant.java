@@ -3,6 +3,7 @@ package com.artf.poloa.utility;
 public class Constant {
 
     public static final String BTC_NAME = "BTC";
+    public static final double VALID_AMOUNT_OF_BTC = 0.001; //RULE FOR BUY - IF MORE BUY ELSE SELL IT
     public static final int PERIOD_1M = 60;
     public static final int PERIOD_3M = 180;
     public static final int PERIOD_5M = 300;

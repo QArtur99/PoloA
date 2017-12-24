@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 
 import com.artf.poloa.data.entity.WrapJSONArray;
 import com.artf.poloa.data.network.PoloniexPublicAPI;
-import com.artf.poloa.utility.Settings;
 
 import java.util.ArrayDeque;
 import java.util.HashMap;
@@ -56,7 +55,7 @@ public class PoloniexPublicApi implements DataRepository.PublicAPI {
     }
 
     @Override
-    public Observable<WrapJSONArray> returnTradeHistory(final int timePeriod) {
+    public Observable<WrapJSONArray> returnTradeHistory(final String ccName, final int timePeriod) {
         if (setCallCounter()) {
             return Observable.empty();
         }
@@ -64,12 +63,13 @@ public class PoloniexPublicApi implements DataRepository.PublicAPI {
         long unixTime = System.currentTimeMillis() / 1000L;
         HashMap<String, String> args = new HashMap<>();
         args.put("command", "returnTradeHistory");
-        args.put("currencyPair", Settings.Trade.CC_NAME_PAIR);
+        args.put("currencyPair", "BTC_" + ccName);
         args.put("start", String.valueOf(unixTime - (timePeriod)));
         args.put("end", String.valueOf(unixTime));
         return poloniexPublicAPI.returnTradeHistory(args).flatMap(new Function<WrapJSONArray, ObservableSource<WrapJSONArray>>() {
             @Override
             public ObservableSource<WrapJSONArray> apply(WrapJSONArray wrapJSONArray) throws Exception {
+                wrapJSONArray.ccName = ccName;
                 wrapJSONArray.periodTime = timePeriod;
                 return Observable.just(wrapJSONArray);
             }
@@ -77,7 +77,7 @@ public class PoloniexPublicApi implements DataRepository.PublicAPI {
     }
 
     @Override
-    public Observable<WrapJSONArray> returnChartData(int timePeriod) {
+    public Observable<WrapJSONArray> returnChartData(final String ccName, int timePeriod) {
         if (setCallCounter()) {
             return Observable.empty();
         }
@@ -85,11 +85,19 @@ public class PoloniexPublicApi implements DataRepository.PublicAPI {
         long unixTime = System.currentTimeMillis() / 1000L;
         HashMap<String, String> args = new HashMap<>();
         args.put("command", "returnChartData");
-        args.put("currencyPair", Settings.Trade.CC_NAME_PAIR);
+//        args.put("currencyPair", Settings.Trade.CC_NAME_PAIR);
+        args.put("currencyPair", "BTC_" + ccName);
         args.put("period", String.valueOf(timePeriod));
         args.put("start", String.valueOf(unixTime - (timePeriod * 140)));
         args.put("end", String.valueOf(unixTime));
-        return poloniexPublicAPI.returnChartData(args);
+
+        return poloniexPublicAPI.returnChartData(args).flatMap(new Function<WrapJSONArray, ObservableSource<WrapJSONArray>>() {
+            @Override
+            public ObservableSource<WrapJSONArray> apply(WrapJSONArray wrapJSONArray) throws Exception {
+                wrapJSONArray.ccName = ccName;
+                return Observable.just(wrapJSONArray);
+            }
+        });
     }
 
 }

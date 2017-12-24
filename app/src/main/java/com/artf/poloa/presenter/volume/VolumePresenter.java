@@ -26,12 +26,12 @@ public class VolumePresenter implements VolumeMVP.Presenter {
     }
 
     @Override
-    public void returnTradeHistory(int timePeriod) {
+    public void returnTradeHistory(String ccName, int timePeriod) {
         int threadCount = Runtime.getRuntime().availableProcessors();
         ExecutorService threadPoolExecutor = Executors.newFixedThreadPool(threadCount);
         Scheduler scheduler = Schedulers.from(threadPoolExecutor);
 
-        DisposableObserver<WrapJSONArray> disposableObserver = model.returnTradeHistory(timePeriod).observeOn(scheduler).
+        DisposableObserver<WrapJSONArray> disposableObserver = model.returnTradeHistory(ccName, timePeriod).observeOn(scheduler).
                 subscribeOn(scheduler).subscribeWith(new DisposableObserver<WrapJSONArray>() {
 
             @Override

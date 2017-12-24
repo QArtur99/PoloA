@@ -26,18 +26,18 @@ public class RmiPresenter implements RmiMVP.Presenter {
     }
 
     @Override
-    public void returnChartData(int timePeriod) {
+    public void returnChartData(String ccName, int timePeriod) {
         int threadCount = Runtime.getRuntime().availableProcessors();
         ExecutorService threadPoolExecutor = Executors.newFixedThreadPool(threadCount);
         Scheduler scheduler = Schedulers.from(threadPoolExecutor);
 
-        DisposableObserver<WrapJSONArray> disposableObserver = model.returnChartData(timePeriod).observeOn(scheduler).
+        DisposableObserver<WrapJSONArray> disposableObserver = model.returnChartData(ccName, timePeriod).observeOn(scheduler).
                 subscribeOn(scheduler).subscribeWith(new DisposableObserver<WrapJSONArray>() {
 
             @Override
             public void onNext(@NonNull WrapJSONArray postParent) {
                 if (thread != null) {
-                    thread.returnChartData(postParent.jsonArray);
+                    thread.returnChartData(postParent);
                 }
             }
 

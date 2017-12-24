@@ -9,8 +9,8 @@ import io.reactivex.Observable;
 public interface DataRepository {
     interface PublicAPI {
 
-        Observable<WrapJSONArray> returnTradeHistory(int timePeriod);
-        Observable<WrapJSONArray> returnChartData(int timePeriod);
+        Observable<WrapJSONArray> returnTradeHistory(String ccName, int timePeriod);
+        Observable<WrapJSONArray> returnChartData(String ccName, int timePeriod);
 
     }
 

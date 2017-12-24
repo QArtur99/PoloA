@@ -4,11 +4,13 @@ package com.artf.poloa.presenter.manager;
 import android.util.Log;
 
 import com.artf.poloa.data.entity.Buy;
+import com.artf.poloa.data.entity.TradeObject;
 import com.artf.poloa.utility.Constant;
 import com.artf.poloa.utility.Mode;
 import com.artf.poloa.utility.Settings;
 import com.google.gson.JsonObject;
 
+import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -22,6 +24,8 @@ public class ManagerThread extends Thread implements ManagerMVP.Thread, ManagerM
     private double lastValueCC;
     private double rateOfLastBuy;
     private double trend24H, trend15m;
+    private HashMap<String, TradeObject> ccMap;
+
 
     private Mode tradeMode = Mode.SELL;
 
@@ -34,8 +38,9 @@ public class ManagerThread extends Thread implements ManagerMVP.Thread, ManagerM
         this.presenter = presenter;
         presenter.setThread(this);
         rateOfLastBuy = Settings.Trade.RATE_OF_LAST_BUY;
-    }
+        ccMap = Settings.Trade.CC_LIST;
 
+    }
 
     @Override
     public void run() {
@@ -45,28 +50,35 @@ public class ManagerThread extends Thread implements ManagerMVP.Thread, ManagerM
     }
 
     @Override
-    public void setRmiData(double rmiValue, double rmiSingal) {
+    public void setRmiData(String ccName, double rmiValue, double rmiSingal) {
         this.rmiValue = rmiValue;
         this.rmiSingal = rmiSingal;
+        ccMap.get(ccName).rmiValue = rmiValue;
+        ccMap.get(ccName).rmiSingal = rmiSingal;
         double xx = rmiSingal + rmiValue;
     }
 
     @Override
-    public void setTradeHistory24H(double trend24H) {
+    public void setTradeHistory24H(String ccName, double trend24H) {
         this.trend24H = trend24H;
+        ccMap.get(ccName).trend24H = trend24H;
     }
 
     @Override
-    public void setTradeHistory15m(double trend15m) {
+    public void setTradeHistory15m(String ccName, double trend15m) {
         this.trend15m = trend15m;
+        ccMap.get(ccName).trend15m = trend15m;
 
     }
 
     @Override
-    public void setStochasticData(double stochValue, double stochSignal) {
+    public void setStochasticData(String ccName, double stochValue, double stochSignal) {
         this.stochValue = stochValue;
         this.stochSignal = stochSignal;
+        ccMap.get(ccName).stochValue = stochValue;
+        ccMap.get(ccName).stochSignal = stochSignal;
         double xx = rmiSingal + rmiValue;
+
     }
 
 
@@ -80,9 +92,12 @@ public class ManagerThread extends Thread implements ManagerMVP.Thread, ManagerM
 
 
     @Override
-    public void setLastValue(double close) {
-        this.lastValueCC = close;
-        presenter.returnBalances();
+    public void setLastValue(String ccName, double lastValueCC) {
+        this.lastValueCC = lastValueCC;
+        ccMap.get(ccName).lastValueCC = lastValueCC;
+        Log.i(ManagerThread.class.getSimpleName(), ccName  + " : " + String.valueOf(lastValueCC));
+
+//        presenter.returnBalances();
 
     }
 
@@ -101,7 +116,7 @@ public class ManagerThread extends Thread implements ManagerMVP.Thread, ManagerM
     public void returnBalances(JsonObject jsonObject) {
         balanceBTC = jsonObject.get(Constant.BTC_NAME).getAsDouble();
         balanceSelectedCC = jsonObject.get(Settings.Trade.CC_NAME).getAsDouble();
-        if ((balanceSelectedCC - Settings.Trade.DONT_CARE_BALANCE) > Settings.Trade.VALID_AMOUNT) {
+        if ((balanceSelectedCC - Settings.Trade.DONT_CARE_BALANCE) > Constant.VALID_AMOUNT_OF_BTC / lastValueCC) {
             tradeMode = Mode.SELL;
         } else {
             tradeMode = Mode.BUY;
@@ -158,7 +173,7 @@ public class ManagerThread extends Thread implements ManagerMVP.Thread, ManagerM
         double sellLock = rateOfLastBuy + (rateOfLastBuy * 0.0169);
         double sellLock2 = rateOfLastBuy - (rateOfLastBuy * 0.05);
         if (tradeMode.isBuy()  && trend15m > Settings.Trend.RULE_LONG_TREND && rmiValue > rmiSingal && rmiValue - rmiSingal > 5 && 30 > stochSignal
-                || tradeMode.isBuy() && trend15m > Settings.Trend.RULE_LONG_TREND && rmiValue > rmiSingal && rmiValue - rmiSingal > 5 && 40 > rmiSingal) {
+                || tradeMode.isBuy() && trend15m > Settings.Trend.RULE_LONG_TREND && rmiValue > rmiSingal && rmiValue - rmiSingal > 5 && 30 > rmiSingal) {
             availableBTC = balanceBTC * Settings.Trade.AVAILABLE_BTC_FOR_TRADE_PERCENTAGE;
             double rateForBuy = lastValueCC + (lastValueCC * 0.01);
             double amount = availableBTC / rateForBuy;

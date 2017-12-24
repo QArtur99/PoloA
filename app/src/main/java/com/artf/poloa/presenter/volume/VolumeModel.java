@@ -16,13 +16,8 @@ public class VolumeModel implements VolumeMVP.Model {
 
 
     @Override
-    public Observable<WrapJSONArray> returnChartData(int timePeriod) {
-        return repositoryRetrofit.returnChartData(timePeriod);
-    }
-
-    @Override
-    public Observable<WrapJSONArray> returnTradeHistory(int timePeriod) {
-        return repositoryRetrofit.returnTradeHistory(timePeriod);
+    public Observable<WrapJSONArray> returnTradeHistory(String ccName, int timePeriod) {
+        return repositoryRetrofit.returnTradeHistory(ccName, timePeriod);
     }
 
 }

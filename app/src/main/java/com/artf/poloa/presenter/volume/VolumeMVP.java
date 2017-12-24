@@ -24,13 +24,12 @@ public interface VolumeMVP {
 
 
     interface Presenter {
-        void returnTradeHistory(int timePeriod);
+        void returnTradeHistory(String ccName, int timePeriod);
         void setThread(VolumeMVP.Thread thread);
         void onStop();
     }
 
     interface Model {
-        Observable<WrapJSONArray> returnChartData(int timePeriod);
-        Observable<WrapJSONArray> returnTradeHistory(int timePeriod);
+        Observable<WrapJSONArray> returnTradeHistory(String ccName, int timePeriod);
     }
 }

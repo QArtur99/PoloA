@@ -1,7 +1,11 @@
 package com.artf.poloa.presenter.rmi;
 
 
+import android.util.Log;
+
 import com.artf.poloa.data.entity.PublicChartData;
+import com.artf.poloa.data.entity.TradeObject;
+import com.artf.poloa.data.entity.WrapJSONArray;
 import com.artf.poloa.presenter.manager.ManagerMVP;
 import com.artf.poloa.utility.Constant;
 import com.artf.poloa.utility.Settings;
@@ -10,7 +14,9 @@ import com.google.gson.JsonArray;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -28,7 +34,7 @@ public class RmiThread extends Thread implements RmiMVP.Thread, RmiMVP.ThreadUI 
     private List<Double> upEmaList = new ArrayList<>();
     private List<Double> dnEmaList = new ArrayList<>();
     private List<PublicChartData> publicChartDataList = new ArrayList<>();
-
+    private HashMap<String, TradeObject> ccMap;
     private double signalRmiValue, signalStochValue;
 
     private RmiMVP.Presenter presenter;
@@ -39,6 +45,7 @@ public class RmiThread extends Thread implements RmiMVP.Thread, RmiMVP.ThreadUI 
     public RmiThread(RmiMVP.Presenter presenter) {
         this.presenter = presenter;
         presenter.setThread(this);
+        ccMap = Settings.Trade.CC_LIST;
     }
 
 
@@ -51,16 +58,19 @@ public class RmiThread extends Thread implements RmiMVP.Thread, RmiMVP.ThreadUI 
 
 
     @Override
-    public void returnChartData(JsonArray jsonArray) {
+    public void returnChartData(WrapJSONArray wrapJSONArray) {
+        synchronized (this) {
+            String ccName = wrapJSONArray.ccName;
 
-        clearLists();
-        setCloseData(jsonArray);
-        countRmi(publicChartDataList);
-        stoch(publicChartDataList);
+            clearLists();
+            setCloseData(wrapJSONArray.jsonArray);
+            countRmi(publicChartDataList);
+            stoch(publicChartDataList);
 
-        threadReceiver.setRmiData(rmi.getFirst(), signalRmiValue);
-        threadReceiver.setStochasticData(stochD.getFirst(), signalStochValue);
-        threadReceiver.setLastValue(publicChartDataList.get(0).close);
+            threadReceiver.setRmiData(ccName, rmi.getFirst(), signalRmiValue);
+            threadReceiver.setStochasticData(ccName, stochD.getFirst(), signalStochValue);
+            threadReceiver.setLastValue(ccName, publicChartDataList.get(0).close);
+        }
 
     }
 
@@ -230,8 +240,19 @@ public class RmiThread extends Thread implements RmiMVP.Thread, RmiMVP.ThreadUI 
     }
 
     private class LoopTask extends TimerTask {
+
         public void run() {
-            presenter.returnChartData(Constant.PERIOD_5M);
+
+                Set<String> keys = ccMap.keySet();
+                for (String key : keys) {
+                    presenter.returnChartData(key, Constant.PERIOD_5M);
+                    Log.i(RmiThread.class.getSimpleName() , key);
+                    try {
+                        Thread.sleep(5001L);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
         }
     }
 

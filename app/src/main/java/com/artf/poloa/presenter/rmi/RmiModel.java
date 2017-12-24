@@ -16,8 +16,8 @@ public class RmiModel implements RmiMVP.Model {
 
 
     @Override
-    public Observable<WrapJSONArray> returnChartData(int timePeriod) {
-        return repositoryRetrofit.returnChartData(timePeriod);
+    public Observable<WrapJSONArray> returnChartData(String ccName, int timePeriod) {
+        return repositoryRetrofit.returnChartData(ccName, timePeriod);
     }
 
 }

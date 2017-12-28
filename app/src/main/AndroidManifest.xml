@@ -22,6 +22,9 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <service
+            android:name="com.artf.poloa.presenter.manager.ManagerThread"
+            android:enabled="true"/>
     </application>
 
 </manifest>

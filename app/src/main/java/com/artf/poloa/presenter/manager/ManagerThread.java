@@ -1,6 +1,12 @@
 package com.artf.poloa.presenter.manager;
 
 
+import android.app.Service;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Binder;
+import android.os.IBinder;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.artf.poloa.data.entity.Buy;
@@ -16,10 +22,18 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 
-public class ManagerThread extends Thread implements ManagerMVP.Thread, ManagerMVP.ThreadReceiver {
+public class ManagerThread extends Service implements ManagerMVP.Thread, ManagerMVP.ThreadReceiver {
 
+    public static final String ACTION_START_SERVICE = "com.artf.poloa.presenter.manager.start.service";
 //    @Inject
     ManagerMVP.Presenter presenter;
+    int cc = 99;
+    private final IBinder mBinder = new LocalBinder();
+    public class LocalBinder extends Binder {
+        public ManagerMVP.ThreadReceiver getService() {
+            return ManagerThread.this;
+        }
+    }
 //    @Inject
 //    RmiMVP.ThreadUI rmiThread;
 //    @Inject
@@ -33,6 +47,27 @@ public class ManagerThread extends Thread implements ManagerMVP.Thread, ManagerM
         this.presenter = presenter;
         presenter.setThread(this);
         ccMap = Settings.Trade.CC_LIST;
+    }
+
+    public ManagerThread(){
+        super();
+    }
+
+    public static void startService(Context context) {
+        Intent intent = new Intent(context, ManagerThread.class);
+        intent.setAction(ACTION_START_SERVICE);
+        context.startService(intent);
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        cc = 00;
+        long delay = 1000L * Constant.PERIOD_3M;
+        long wait = 1000L * Constant.PERIOD_1M;
+        Timer timer = new Timer();
+        HashMap<String, TradeObject> xx = ccMap;
+        timer.scheduleAtFixedRate(loopTask, delay, wait);
+        return START_STICKY;
     }
 
 //    public ManagerThread(Context context, ManagerMVP.View view) {
@@ -52,16 +87,8 @@ public class ManagerThread extends Thread implements ManagerMVP.Thread, ManagerM
 
     @Override
     public Boolean isItAlive() {
-        return ManagerThread.this.isAlive();
-    }
-
-
-    @Override
-    public void run() {
-        long delay = 1000L * Constant.PERIOD_3M;
-        long wait = 1000L * Constant.PERIOD_1M;
-        Timer timer = new Timer();
-        timer.scheduleAtFixedRate(loopTask, delay, wait);
+        return true;
+   //     return ManagerThread.this.isAlive();
     }
 
     @Override
@@ -90,7 +117,7 @@ public class ManagerThread extends Thread implements ManagerMVP.Thread, ManagerM
 
     @Override
     public void onStop() {
-        ManagerThread.this.interrupt();
+
 //        if (disposable != null && !disposable.isDisposed()) {
 //            disposable.dispose();
 //        }
@@ -106,12 +133,12 @@ public class ManagerThread extends Thread implements ManagerMVP.Thread, ManagerM
     @Override
     public void setView(ManagerMVP.View view) {
         this.view = view;
+        ccMap = Settings.Trade.CC_LIST;
     }
 
     @Override
     public void startThread() {
-        ManagerThread.this.setPriority(Thread.MAX_PRIORITY);
-        ManagerThread.this.start();
+
     }
 
     @Override
@@ -211,6 +238,17 @@ public class ManagerThread extends Thread implements ManagerMVP.Thread, ManagerM
                 presenter.sell(Constant.FILL_OR_KILL, ccName, rateForSell, to.balanceSelectedCC);
             }
         }
+    }
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return mBinder;
+    }
+
+    /** method for clients */
+    public int getRandomNumber() {
+        return cc;
     }
 
     private class LoopTask extends TimerTask {

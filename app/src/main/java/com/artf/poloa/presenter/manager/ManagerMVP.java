@@ -31,6 +31,7 @@ public interface ManagerMVP {
         void setStochasticData(String ccName, double rmiValue, double rmiSingal);
         void setView(ManagerMVP.View view);
         void startThread();
+        Boolean isItAlive();
         void onStop();
         void setLastValue(String ccName, double close);
     }
@@ -38,15 +39,15 @@ public interface ManagerMVP {
 
     interface Presenter {
         void returnBalances();
-        void buy(double rate, double amount);
-        void sell(double rate, double amount);
+        void buy(String ccName, double rate, double amount);
+        void sell(String type, String ccName, double rate, double amount);
         void setThread(ManagerMVP.Thread thread);
         void onStop();
     }
 
     interface Model {
         Observable<WrapJSONObject> returnBalances();
-        Observable<Buy> buy(double rate, double amount);
-        Observable<WrapJSONObject> sell(double rate, double amount);
+        Observable<Buy> buy(String ccName, double rate, double amount);
+        Observable<WrapJSONObject> sell(String type, String ccName, double rate, double amount);
     }
 }

@@ -19,6 +19,7 @@ public interface VolumeMVP {
     interface ThreadUI {
         void setDataReciver(ManagerMVP.ThreadReceiver threadReceiver);
         void startThread();
+        Boolean isItAlive();
         void onStop();
     }
 

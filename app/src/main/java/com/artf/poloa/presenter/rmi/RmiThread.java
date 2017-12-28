@@ -48,18 +48,22 @@ public class RmiThread extends Thread implements RmiMVP.Thread, RmiMVP.ThreadUI 
         ccMap = Settings.Trade.CC_LIST;
     }
 
+    @Override
+    public Boolean isItAlive(){
+        return RmiThread.this.isAlive();
+    }
+
 
     @Override
     public void run() {
-        long wait = 1000L * Constant.PERIOD_3M;
+        long wait = 1000L * Constant.PERIOD_2M;
         Timer timer = new Timer();
         timer.scheduleAtFixedRate(loopTask, 0, wait);
     }
 
 
     @Override
-    public void returnChartData(WrapJSONArray wrapJSONArray) {
-        synchronized (this) {
+    public synchronized void returnChartData(WrapJSONArray wrapJSONArray) {
             String ccName = wrapJSONArray.ccName;
 
             clearLists();
@@ -70,8 +74,6 @@ public class RmiThread extends Thread implements RmiMVP.Thread, RmiMVP.ThreadUI 
             threadReceiver.setRmiData(ccName, rmi.getFirst(), signalRmiValue);
             threadReceiver.setStochasticData(ccName, stochD.getFirst(), signalStochValue);
             threadReceiver.setLastValue(ccName, publicChartDataList.get(0).close);
-        }
-
     }
 
     private void clearLists() {
@@ -236,6 +238,7 @@ public class RmiThread extends Thread implements RmiMVP.Thread, RmiMVP.ThreadUI 
 
     @Override
     public void startThread() {
+        RmiThread.this.setPriority(Thread.MAX_PRIORITY);
         RmiThread.this.start();
     }
 
@@ -248,7 +251,7 @@ public class RmiThread extends Thread implements RmiMVP.Thread, RmiMVP.ThreadUI 
                     presenter.returnChartData(key, Constant.PERIOD_5M);
                     Log.i(RmiThread.class.getSimpleName() , key);
                     try {
-                        Thread.sleep(5001L);
+                        Thread.sleep(3001L);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }

@@ -8,22 +8,41 @@ public class Settings {
 
     public static class Trade {
         public static final HashMap<String, TradeObject> CC_LIST = new HashMap<String, TradeObject>() {{
-            put("ETH", new TradeObject(0d, 0.04808165));
-            put("ETC", new TradeObject(0d, 0d));
-            put("LTC", new TradeObject(0d, 0d));
-
+            put("AMP", new TradeObject(0d, 0.00004330));
+            put("ARDR", new TradeObject(0d, 0.00010774));
+            put("BTS", new TradeObject(0d, 0.00003599));
+            put("CVC", new TradeObject(0d, 0.00005900));
+            put("DGB", new TradeObject(0d, 0.00000403));
+            put("EMC2", new TradeObject(0d, 0.00005786));
+            put("ETC", new TradeObject(0d, 0.00188080));
+            put("ETH", new TradeObject(0d, 0.04827000));
+            put("EXP", new TradeObject(0d, 0.00039493));
+            put("FCT", new TradeObject(0d, 0.00286296));
+            put("GAME", new TradeObject(0d, 0.00026827));
+            put("GNT", new TradeObject(0d, 0.00005776));
+            put("LSK", new TradeObject(0d, 0.00161031));
+            put("LTC", new TradeObject(0d, 0.01708497));
+            put("MAID", new TradeObject(0d, 0.00005949));
+            put("OMG", new TradeObject(0d, 0.00096345));
+            put("REP", new TradeObject(0d, 0.00526408));
+            put("SC", new TradeObject(0d, 0.00000200));
+            put("STR", new TradeObject(0d, 0.00001404));
+            put("STRAT", new TradeObject(0d, 0.00089586));
+            put("SYS", new TradeObject(0d, 0.00005699));
+            put("VTC", new TradeObject(0d, 0.00047678));
+            put("XEM", new TradeObject(0d, 0.00006047));
+            put("XMR", new TradeObject(0d, 0.02411091));
+            put("XRP", new TradeObject(0d, 0.00008221));
+            put("ZEC", new TradeObject(0d, 0.03446435));
         }};
 
+        public static final double AVAILABLE_BTC_FOR_TRADE_PERCENTAGE = 0.01;
+        public static final double SELL_IF_DROPPED_PERCENTAGE = 0.99;
 
-        public static final String CC_NAME_PAIR = "BTC_ETH";
-        public static final String CC_NAME = "ETH";
-        public static final double AVAILABLE_BTC_FOR_TRADE_PERCENTAGE = 0.05;
-        public static final double RATE_OF_LAST_BUY = 0.04808165; // IF SELL
-        public static final double DONT_CARE_BALANCE = 0;
     }
 
     public static class Trend {
-        public static final double RULE_LONG_TREND = 0.85;
+        public static final double RULE_LONG_TREND = 1.0;
     }
 
     public static class RMI {

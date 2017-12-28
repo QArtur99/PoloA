@@ -22,13 +22,13 @@ public class ManagerModel implements ManagerMVP.Model {
     }
 
     @Override
-    public Observable<Buy> buy(double rate, double amount) {
-        return repositoryRetrofit.buy(rate, amount);
+    public Observable<Buy> buy(String ccName, double rate, double amount) {
+        return repositoryRetrofit.buy(ccName, rate, amount);
     }
 
     @Override
-    public Observable<WrapJSONObject> sell(double rate, double amount) {
-        return repositoryRetrofit.sell(rate, amount);
+    public Observable<WrapJSONObject> sell(String type, String ccName, double rate, double amount) {
+        return repositoryRetrofit.sell(type, ccName, rate, amount);
     }
 
 }

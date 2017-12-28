@@ -3,6 +3,7 @@ package com.artf.poloa.presenter.root;
 import com.artf.poloa.MainActivity;
 import com.artf.poloa.data.network.RetrofitModule;
 import com.artf.poloa.presenter.manager.ManagerModule;
+import com.artf.poloa.presenter.manager.ManagerThread;
 import com.artf.poloa.presenter.rmi.RmiModule;
 import com.artf.poloa.presenter.volume.VolumeModule;
 
@@ -15,5 +16,6 @@ import dagger.Component;
 public interface ApplicationComponent {
 
     void inject(MainActivity mainActivity);
+    void inject(ManagerThread managerThread);
 
 }

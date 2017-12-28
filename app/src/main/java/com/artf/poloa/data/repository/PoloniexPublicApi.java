@@ -38,20 +38,22 @@ public class PoloniexPublicApi implements DataRepository.PublicAPI {
 
 
     private boolean setCallCounter() {
-        if (callCounterLine.size() > CALLS_PER_SEC) {
-            callCounterLine.removeLast();
-        }
+        synchronized (this) {
+            if (callCounterLine.size() > CALLS_PER_SEC) {
+                callCounterLine.removeLast();
+            }
 
-        long now = System.currentTimeMillis();
-        long timeGap = now - callCounterLine.getLast();
-        if (callCounterLine.size() >= CALLS_PER_SEC && TIME_LIMIT_IN_MILLIS > timeGap) {
-            String waitString = String.valueOf(TIME_LIMIT_IN_MILLIS - timeGap);
-            String x = "You have to wait:" + waitString + "millis";
-            mObservable.onNext(x);
-            return true;
+            long now = System.currentTimeMillis();
+            long timeGap = now - callCounterLine.getLast();
+            if (callCounterLine.size() >= CALLS_PER_SEC && TIME_LIMIT_IN_MILLIS > timeGap) {
+                String waitString = String.valueOf(TIME_LIMIT_IN_MILLIS - timeGap);
+                String x = "You have to wait:" + waitString + "millis";
+                mObservable.onNext(x);
+                return true;
+            }
+            callCounterLine.addFirst(System.currentTimeMillis());
+            return false;
         }
-        callCounterLine.addFirst(System.currentTimeMillis());
-        return false;
     }
 
     @Override

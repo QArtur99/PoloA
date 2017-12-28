@@ -8,12 +8,13 @@ import com.artf.poloa.data.entity.Buy;
 import com.artf.poloa.data.entity.WrapJSONObject;
 import com.artf.poloa.data.network.PoloniexTradingAPI;
 import com.artf.poloa.data.utility.Utility;
-import com.artf.poloa.utility.Settings;
 
 import java.util.ArrayDeque;
 import java.util.HashMap;
 
 import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
+import io.reactivex.functions.Function;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
 
@@ -40,20 +41,22 @@ public class PoloniexTradingApi implements DataRepository.TradingAPI {
 
 
     private boolean setCallCounter() {
-        if (callCounterLine.size() > CALLS_PER_SEC) {
-            callCounterLine.removeLast();
-        }
+        synchronized (this) {
+            if (callCounterLine.size() > CALLS_PER_SEC) {
+                callCounterLine.removeLast();
+            }
 
-        long now = System.currentTimeMillis();
-        long timeGap = now - callCounterLine.getLast();
-        if (callCounterLine.size() >= CALLS_PER_SEC && TIME_LIMIT_IN_MILLIS > timeGap) {
-            String waitString = String.valueOf(TIME_LIMIT_IN_MILLIS - timeGap);
-            String x = "You have to wait:" + waitString + "millis";
-            mObservable.onNext(x);
-            return true;
+            long now = System.currentTimeMillis();
+            long timeGap = now - callCounterLine.getLast();
+            if (callCounterLine.size() >= CALLS_PER_SEC && TIME_LIMIT_IN_MILLIS > timeGap) {
+                String waitString = String.valueOf(TIME_LIMIT_IN_MILLIS - timeGap);
+                String x = "You have to wait:" + waitString + "millis";
+                mObservable.onNext(x);
+                return true;
+            }
+            callCounterLine.addFirst(System.currentTimeMillis());
+            return false;
         }
-        callCounterLine.addFirst(System.currentTimeMillis());
-        return false;
     }
 
     @Override
@@ -72,14 +75,14 @@ public class PoloniexTradingApi implements DataRepository.TradingAPI {
     }
 
     @Override
-    public Observable<Buy> buy(double rate, double amount) {
+    public Observable<Buy> buy(final String ccName, double rate, double amount) {
         if (setCallCounter()) {
             return Observable.empty();
         }
 
         HashMap<String, String> args = new HashMap<String, String>();
         args.put("command", "buy");
-        args.put("currencyPair", Settings.Trade.CC_NAME_PAIR);
+        args.put("currencyPair", "BTC_" + ccName);
         args.put("rate", String.valueOf(rate));
         args.put("amount", String.valueOf(amount));
         args.put("immediateOrCancel", "1");
@@ -88,27 +91,39 @@ public class PoloniexTradingApi implements DataRepository.TradingAPI {
         String postData = Utility.getUri(args);
         String signature = Utility.getSignature(SECRET_KEY, postData);
 
-        return poloniexTradingAPI.buy(KEY, signature, args);
+        return poloniexTradingAPI.buy(KEY, signature, args).flatMap(new Function<Buy, ObservableSource<Buy>>() {
+            @Override
+            public ObservableSource<Buy> apply(Buy wrapJSONArray) throws Exception {
+                wrapJSONArray.ccName = ccName;
+                return Observable.just(wrapJSONArray);
+            }
+        });
     }
 
     @Override
-    public Observable<WrapJSONObject> sell(double rate, double amount) {
+    public Observable<WrapJSONObject> sell(String type, final String ccName, double rate, double amount) {
         if (setCallCounter()) {
             return Observable.empty();
         }
 
         HashMap<String, String> args = new HashMap<String, String>();
         args.put("command", "sell");
-        args.put("currencyPair", Settings.Trade.CC_NAME_PAIR);
+        args.put("currencyPair", "BTC_" + ccName);
         args.put("rate", String.valueOf(rate));
         args.put("amount", String.valueOf(amount));
-        args.put("fillOrKill", "1");
+        args.put(type, "1");
 
         args.put("nonce", String.valueOf(System.currentTimeMillis()));
         String postData = Utility.getUri(args);
         String signature = Utility.getSignature(SECRET_KEY, postData);
 
-        return poloniexTradingAPI.sell(KEY, signature, args);
+        return poloniexTradingAPI.sell(KEY, signature, args).flatMap(new Function<WrapJSONObject, ObservableSource<WrapJSONObject>>() {
+            @Override
+            public ObservableSource<WrapJSONObject> apply(WrapJSONObject wrapJSONArray) throws Exception {
+                wrapJSONArray.ccName = ccName;
+                return Observable.just(wrapJSONArray);
+            }
+        });
     }
 
 

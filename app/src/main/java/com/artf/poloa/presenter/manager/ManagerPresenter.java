@@ -58,12 +58,13 @@ public class ManagerPresenter implements ManagerMVP.Presenter {
     }
 
     @Override
-    public void buy(double rate, double amount) {
+    public void buy(String ccName, double rate, double amount) {
+        Log.e(ManagerPresenter.class.getSimpleName(), "BUY" + ccName);
         int threadCount = Runtime.getRuntime().availableProcessors();
         ExecutorService threadPoolExecutor = Executors.newFixedThreadPool(threadCount);
         Scheduler scheduler = Schedulers.from(threadPoolExecutor);
 
-        DisposableObserver<Buy> disposableObserver = model.buy(rate, amount).observeOn(scheduler).
+        DisposableObserver<Buy> disposableObserver = model.buy(ccName, rate, amount).observeOn(scheduler).
                 subscribeOn(scheduler).subscribeWith(new DisposableObserver<Buy>() {
 
             @Override
@@ -76,7 +77,7 @@ public class ManagerPresenter implements ManagerMVP.Presenter {
             @Override
             public void onError(@NonNull Throwable e) {
                 if (thread != null) {
-                    Log.e(ManagerPresenter.class.getName(), e.getMessage());
+                    Log.e(ManagerPresenter.class.getSimpleName(), "BUY" + e.toString());
                     thread.erorrBuy();
                 }
             }
@@ -89,12 +90,13 @@ public class ManagerPresenter implements ManagerMVP.Presenter {
     }
 
     @Override
-    public void sell(double rate, double amount) {
+    public void sell(String type, String ccName, double rate, double amount) {
+        Log.e(ManagerPresenter.class.getSimpleName(), "SELL" + ccName);
         int threadCount = Runtime.getRuntime().availableProcessors();
         ExecutorService threadPoolExecutor = Executors.newFixedThreadPool(threadCount);
         Scheduler scheduler = Schedulers.from(threadPoolExecutor);
 
-        DisposableObserver<WrapJSONObject> disposableObserver = model.sell(rate, amount).observeOn(scheduler).
+        DisposableObserver<WrapJSONObject> disposableObserver = model.sell(type, ccName, rate, amount).observeOn(scheduler).
                 subscribeOn(scheduler).subscribeWith(new DisposableObserver<WrapJSONObject>() {
 
             @Override
@@ -107,7 +109,7 @@ public class ManagerPresenter implements ManagerMVP.Presenter {
             @Override
             public void onError(@NonNull Throwable e) {
                 if (thread != null) {
-                    Log.e(ManagerPresenter.class.getName(), e.getMessage());
+                    Log.e(ManagerPresenter.class.getSimpleName(), "SELL" + e.toString());
                     thread.erorrSell();
                 }
             }

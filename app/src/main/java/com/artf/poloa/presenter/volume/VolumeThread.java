@@ -19,7 +19,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import static com.artf.poloa.utility.Constant.PERIOD_1D;
-import static com.artf.poloa.utility.Constant.PERIOD_1M;
+import static com.artf.poloa.utility.Constant.PERIOD_2M;
 import static com.artf.poloa.utility.Constant.PERIOD_30M;
 import static com.artf.poloa.utility.Constant.PERIOD_5M;
 
@@ -39,20 +39,24 @@ public class VolumeThread extends Thread implements VolumeMVP.Thread, VolumeMVP.
         ccMap = Settings.Trade.CC_LIST;
     }
 
-
     @Override
-    public void run() {
-        long wait24H = 1000L * PERIOD_5M + 1L;
-        long wait30m = 1000L * PERIOD_1M + 1L;
-        Timer timer = new Timer();
-//        timer.scheduleAtFixedRate(loopTradeHistory24H, 0, wait24H);
-        timer.scheduleAtFixedRate(loopTradeHistory15m, 0, wait30m);
+    public Boolean isItAlive(){
+        return VolumeThread.this.isAlive();
     }
 
 
     @Override
-    public void returnTradeHistory(WrapJSONArray wrapJSONArray) {
-        synchronized (this) {
+    public void run() {
+        long wait24H = 1000L * PERIOD_5M + 1L;
+        long wait30m = 1000L * PERIOD_2M + 1L;
+        Timer timer = new Timer();
+//        timer.scheduleAtFixedRate(loopTradeHistory24H, 0, wait24H);
+        timer.scheduleAtFixedRate(loopTradeHistory15m, 2001L, wait30m);
+    }
+
+
+    @Override
+    public synchronized void returnTradeHistory(WrapJSONArray wrapJSONArray) {
             String ccName = wrapJSONArray.ccName;
             publicTradeHistoryList.clear();
             setData(wrapJSONArray.jsonArray);
@@ -64,7 +68,6 @@ public class VolumeThread extends Thread implements VolumeMVP.Thread, VolumeMVP.
                     threadReceiver.setTradeHistory24H(ccName, getVolumeRate(publicTradeHistoryList));
                     break;
             }
-        }
     }
 
     private double getVolumeRate(List<PublicTradeHistory> publicTradeHistoryList){
@@ -106,6 +109,7 @@ public class VolumeThread extends Thread implements VolumeMVP.Thread, VolumeMVP.
 
     @Override
     public void startThread() {
+        VolumeThread.this.setPriority(Thread.MAX_PRIORITY);
         VolumeThread.this.start();
     }
 
@@ -116,7 +120,7 @@ public class VolumeThread extends Thread implements VolumeMVP.Thread, VolumeMVP.
                 presenter.returnTradeHistory(key, PERIOD_1D);
                 Log.i(VolumeThread.class.getSimpleName() , key);
                 try {
-                    Thread.sleep(5001L);
+                    Thread.sleep(3001L);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -131,7 +135,7 @@ public class VolumeThread extends Thread implements VolumeMVP.Thread, VolumeMVP.
                 presenter.returnTradeHistory(key, PERIOD_30M);
                 Log.i(VolumeThread.class.getSimpleName() , key);
                 try {
-                    Thread.sleep(5001L);
+                    Thread.sleep(3001L);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

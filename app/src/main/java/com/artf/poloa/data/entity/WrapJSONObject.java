@@ -9,6 +9,7 @@ import com.google.gson.annotations.JsonAdapter;
 public class WrapJSONObject {
 
     public JsonObject jsonObject;
+    public String ccName;
 
     public WrapJSONObject(JsonObject jsonObject) {
         this.jsonObject = jsonObject;

@@ -17,8 +17,8 @@ public interface DataRepository {
     interface TradingAPI {
 
         Observable<WrapJSONObject> returnBalances();
-        Observable<Buy> buy(double rate, double amount);
-        Observable<WrapJSONObject> sell(double rate, double amount);
+        Observable<Buy> buy(String ccName, double rate, double amount);
+        Observable<WrapJSONObject> sell(String type, String ccName, double rate, double amount);
 
     }
 }

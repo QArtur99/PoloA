@@ -12,11 +12,11 @@ import dagger.Provides;
 public class ManagerModule {
 
 
-    @Provides
-    @Singleton
-    public ManagerMVP.ThreadReceiver provideThread(ManagerMVP.Presenter presenter){
-        return new ManagerThread(presenter);
-    }
+//    @Provides
+//    @Singleton
+//    public ManagerMVP.ThreadReceiver provideThread(ManagerMVP.Presenter presenter){
+//        return new ManagerThread(presenter);
+//    }
 
 
     @Provides

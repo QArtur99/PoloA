@@ -1,5 +1,6 @@
 package com.artf.poloa;
 
+import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -7,30 +8,28 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.widget.Toast;
 
+import com.artf.poloa.data.database.Utility;
+import com.artf.poloa.data.entity.TradeObject;
 import com.artf.poloa.presenter.manager.ManagerMVP;
 import com.artf.poloa.presenter.manager.ManagerThread;
-import com.artf.poloa.presenter.rmi.RmiMVP;
-import com.artf.poloa.presenter.root.App;
-import com.artf.poloa.presenter.volume.VolumeMVP;
+import com.artf.poloa.utility.Settings;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
-import javax.inject.Inject;
+import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.Set;
 
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 public class MainActivity extends AppCompatActivity implements ManagerMVP.View {
 
-    @Inject
-    ManagerMVP.ThreadReceiver managerThreadReceiver;
 
-    @Inject
-    RmiMVP.ThreadUI rmiThread;
-
-    @Inject
-    VolumeMVP.ThreadUI volumeThread;
-    ManagerMVP.ThreadReceiver mService;
+    ManagerMVP.ThreadReceiver managerService;
     boolean mBound = false;
 
     @Override
@@ -38,56 +37,59 @@ public class MainActivity extends AppCompatActivity implements ManagerMVP.View {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-        ((App) getApplication()).getComponent().inject(this);
-        Intent intent = new Intent(this, ManagerThread.class);
-        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
     }
 
 
     @OnClick(R.id.startButton)
     public void startButton() {
-//        ManagerThread thread = new ManagerThread(this, this);
-//        thread.startThread();
-//
-//        if (thread.isAlive()) {
-//            Toast.makeText(this, "isAlive: true", Toast.LENGTH_LONG).show();
-//        } else {
-//            Toast.makeText(this, "isAlive: false", Toast.LENGTH_LONG).show();
-//        }
-      //  managerThreadReceiver.setView(this);
-//        managerThreadReceiver.startThread();
+        HashMap<String, TradeObject> ccMap = Settings.Trade.CC_LIST;
+        HashMap<String, TradeObject> ccMap2 = Utility.loadHashMap(getApplicationContext());
+
+        Set<String> keys = ccMap.keySet();
+        for (String key : keys) {
+            if(!ccMap2.containsKey(key)){
+                ccMap2.put(key, ccMap.get(key));
+            }
+        }
+
+        Set<String> keys2 = ccMap2.keySet();
+        for (String key : keys2) {
+            if(!ccMap.containsKey(key)){
+                ccMap2.remove(key);
+            }
+        }
+
+        Type type = new TypeToken<HashMap<String, TradeObject>>() {}.getType();
+        String jsonStringHashMap = new Gson().toJson(ccMap2, type);
+        Utility.updateDatabase(getApplicationContext(), jsonStringHashMap);
+
         ManagerThread.startService(this);
-
-//        ManagerThread.startService(this);
-//        volumeThread.setDataReciver(managerThreadReceiver);
-//        volumeThread.startThread();
-//
-//        rmiThread.setDataReciver(managerThreadReceiver);
-//        rmiThread.startThread();
-
-     //   isAlive();
     }
 
-    @Override
-    protected void onPause() {
-        this.onResume();
-        super.onPause();
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        if (manager != null) {
+            for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+                if (serviceClass.getName().equals(service.service.getClassName())) {
+                    Log.i("isMyServiceRunning?", true+"");
+                    return true;
+                }
+            }
+        }
+        Log.i("isMyServiceRunning?", false+"");
+        return false;
     }
+
+
 
     @OnClick(R.id.isAlive)
     public void isAlive() {
-        if (mBound) {
-            // Call a method from the LocalService.
-            // However, if this call were something that might hang, then this request should
-            // occur in a separate thread to avoid slowing down the activity performance.
-            int num = mService.getRandomNumber();
-            Toast.makeText(this, "number: " + num, Toast.LENGTH_SHORT).show();
+        if (isMyServiceRunning(ManagerThread.class) && mBound) {
+            int num = managerService.getRandomNumber();
+            Toast.makeText(this, "isAlive: true" + num, Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(this, "isAlive: false", Toast.LENGTH_LONG).show();
         }
-//        if (managerThreadReceiver.isItAlive() && volumeThread.isItAlive() && rmiThread.isItAlive()) {
-//            Toast.makeText(this, "isAlive: true", Toast.LENGTH_LONG).show();
-//        } else {
-//            Toast.makeText(this, "isAlive: false", Toast.LENGTH_LONG).show();
-//        }
     }
 
     @Override
@@ -95,30 +97,18 @@ public class MainActivity extends AppCompatActivity implements ManagerMVP.View {
 //        MainActivity.this.finish();
     }
 
-//    @SuppressLint("MissingSuperCall")
-//    @Override
-//    protected void onPause() {
-//        // super.onPause();
-//    }
-//
-//    @SuppressLint("MissingSuperCall")
-//    @Override
-//    protected void onStop() {
-//        //  super.onStop();
-//    }
-
-
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        managerThreadReceiver.onStop();
-        volumeThread.onStop();
-        rmiThread.onStop();
+    protected void onStart() {
+        super.onStart();
+        Intent intent = new Intent(this, ManagerThread.class);
+        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
+    protected void onStop() {
+        super.onStop();
+        unbindService(mConnection);
+        mBound = false;
     }
 
     /** Defines callbacks for service binding, passed to bindService() */
@@ -129,7 +119,7 @@ public class MainActivity extends AppCompatActivity implements ManagerMVP.View {
                                        IBinder service) {
             // We've bound to LocalService, cast the IBinder and get LocalService instance
             ManagerThread.LocalBinder binder = (ManagerThread.LocalBinder) service;
-            mService = binder.getService();
+            managerService = binder.getService();
             mBound = true;
         }
 

@@ -56,7 +56,7 @@ public class RmiThread extends Thread implements RmiMVP.Thread, RmiMVP.ThreadUI 
 
     @Override
     public void run() {
-        long wait = 1000L * Constant.PERIOD_2M;
+        long wait = 1000L * Constant.PERIOD_3M;
         Timer timer = new Timer();
         timer.scheduleAtFixedRate(loopTask, 0, wait);
     }
@@ -251,7 +251,7 @@ public class RmiThread extends Thread implements RmiMVP.Thread, RmiMVP.ThreadUI 
                     presenter.returnChartData(key, Constant.PERIOD_5M);
                     Log.i(RmiThread.class.getSimpleName() , key);
                     try {
-                        Thread.sleep(3001L);
+                        Thread.sleep(4001L);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }

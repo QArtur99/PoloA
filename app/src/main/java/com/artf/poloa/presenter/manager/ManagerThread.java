@@ -9,47 +9,45 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.artf.poloa.data.database.Utility;
 import com.artf.poloa.data.entity.Buy;
 import com.artf.poloa.data.entity.TradeObject;
+import com.artf.poloa.presenter.rmi.RmiMVP;
+import com.artf.poloa.presenter.root.App;
+import com.artf.poloa.presenter.volume.VolumeMVP;
 import com.artf.poloa.utility.Constant;
 import com.artf.poloa.utility.Mode;
 import com.artf.poloa.utility.Settings;
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.util.HashMap;
+import java.util.Random;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import javax.inject.Inject;
 
 
 public class ManagerThread extends Service implements ManagerMVP.Thread, ManagerMVP.ThreadReceiver {
 
     public static final String ACTION_START_SERVICE = "com.artf.poloa.presenter.manager.start.service";
-//    @Inject
-    ManagerMVP.Presenter presenter;
-    int cc = 99;
     private final IBinder mBinder = new LocalBinder();
-    public class LocalBinder extends Binder {
-        public ManagerMVP.ThreadReceiver getService() {
-            return ManagerThread.this;
-        }
-    }
-//    @Inject
-//    RmiMVP.ThreadUI rmiThread;
-//    @Inject
-//    VolumeMVP.ThreadUI volumeThread;
+    @Inject
+    ManagerMVP.Presenter presenter;
+    @Inject
+    RmiMVP.ThreadUI rmiThread;
+    @Inject
+    VolumeMVP.ThreadUI volumeThread;
     private double balanceBTC;
     private HashMap<String, TradeObject> ccMap;
     private ManagerMVP.View view;
     private LoopTask loopTask = new LoopTask();
 
-    public ManagerThread(ManagerMVP.Presenter presenter) {
-        this.presenter = presenter;
-        presenter.setThread(this);
-        ccMap = Settings.Trade.CC_LIST;
-    }
-
-    public ManagerThread(){
+    public ManagerThread() {
         super();
     }
 
@@ -61,34 +59,31 @@ public class ManagerThread extends Service implements ManagerMVP.Thread, Manager
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        cc = 00;
-        long delay = 1000L * Constant.PERIOD_3M;
-        long wait = 1000L * Constant.PERIOD_1M;
-        Timer timer = new Timer();
-        HashMap<String, TradeObject> xx = ccMap;
-        timer.scheduleAtFixedRate(loopTask, delay, wait);
-        return START_STICKY;
+        if(intent.getAction() != null && intent.getAction().equals(ACTION_START_SERVICE)) {
+            ((App) getApplicationContext()).getComponent().inject(this);
+
+            presenter.setThread(this);
+            ccMap = Utility.loadHashMap(getApplicationContext());
+
+            volumeThread.setDataReciver(this);
+            volumeThread.startThread();
+
+            rmiThread.setDataReciver(this);
+            rmiThread.startThread();
+
+            long delay = 1000L * Constant.PERIOD_3M;
+            long wait = 1000L * Constant.PERIOD_2M;
+            Timer timer = new Timer();
+            timer.scheduleAtFixedRate(loopTask, delay, wait);
+
+        }
+        return START_REDELIVER_INTENT;
     }
-
-//    public ManagerThread(Context context, ManagerMVP.View view) {
-//        ((App) context.getApplicationContext()).getComponent().inject(this);
-//        this.view = view;
-//        presenter.setThread(this);
-//        ccMap = Settings.Trade.CC_LIST;
-//
-//
-//        volumeThread.setDataReciver(this);
-//        volumeThread.startThread();
-//
-//        rmiThread.setDataReciver(this);
-//        rmiThread.startThread();
-//    }
-
 
     @Override
     public Boolean isItAlive() {
         return true;
-   //     return ManagerThread.this.isAlive();
+        //     return ManagerThread.this.isAlive();
     }
 
     @Override
@@ -114,15 +109,14 @@ public class ManagerThread extends Service implements ManagerMVP.Thread, Manager
         ccMap.get(ccName).stochSignal = stochSignal;
     }
 
-
     @Override
     public void onStop() {
+
 
 //        if (disposable != null && !disposable.isDisposed()) {
 //            disposable.dispose();
 //        }
     }
-
 
     @Override
     public void setLastValue(String ccName, double lastValueCC) {
@@ -155,11 +149,16 @@ public class ManagerThread extends Service implements ManagerMVP.Thread, Manager
             startBot(key, ccMap.get(key));
 
             try {
-                Thread.sleep(501L);
+                Thread.sleep(1001L);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
+
+        Type type = new TypeToken<HashMap<String, TradeObject>>() {}.getType();
+        String jsonStringHashMap = new Gson().toJson(ccMap, type);
+        Utility.updateDatabase(getApplicationContext(), jsonStringHashMap);
+        Log.e(ManagerThread.class.getSimpleName(), "ccMap SAVE");
     }
 
     @Override
@@ -246,9 +245,17 @@ public class ManagerThread extends Service implements ManagerMVP.Thread, Manager
         return mBinder;
     }
 
-    /** method for clients */
+    /**
+     * method for clients
+     */
     public int getRandomNumber() {
-        return cc;
+        return new Random().nextInt(100);
+    }
+
+    public class LocalBinder extends Binder {
+        public ManagerMVP.ThreadReceiver getService() {
+            return ManagerThread.this;
+        }
     }
 
     private class LoopTask extends TimerTask {

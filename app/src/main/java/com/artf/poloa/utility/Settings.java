@@ -10,9 +10,11 @@ public class Settings {
         public static final HashMap<String, TradeObject> CC_LIST = new HashMap<String, TradeObject>() {{
             put("AMP", new TradeObject(0d, 0.00004330));
             put("ARDR", new TradeObject(0d, 0.00010774));
+            put("BLK", new TradeObject(0d, 0f));
+            put("BURST", new TradeObject(0d, 0f));
             put("BTS", new TradeObject(0d, 0.00003599));
             put("CVC", new TradeObject(0d, 0.00005900));
-            put("DGB", new TradeObject(0d, 0.00000403));
+            put("DGB", new TradeObject(0d, 0.00000414));
             put("EMC2", new TradeObject(0d, 0.00005786));
             put("ETC", new TradeObject(0d, 0.00188080));
             put("ETH", new TradeObject(0d, 0.04827000));
@@ -22,21 +24,24 @@ public class Settings {
             put("GNT", new TradeObject(0d, 0.00005776));
             put("LSK", new TradeObject(0d, 0.00161031));
             put("LTC", new TradeObject(0d, 0.01708497));
-            put("MAID", new TradeObject(0d, 0.00005949));
-            put("OMG", new TradeObject(0d, 0.00096345));
+            put("MAID", new TradeObject(0d, 0.00006391));
+            put("NAV", new TradeObject(0d, 0d));
+            put("NXT", new TradeObject(0d, 0.00005450));
+            put("OMG", new TradeObject(0d, 0.00103880));
             put("REP", new TradeObject(0d, 0.00526408));
-            put("SC", new TradeObject(0d, 0.00000200));
-            put("STR", new TradeObject(0d, 0.00001404));
-            put("STRAT", new TradeObject(0d, 0.00089586));
+            put("SC", new TradeObject(0d, 0.00000198));
+            put("STR", new TradeObject(0d, 0.00001538));
+            put("STEEM", new TradeObject(0d, 0d));
+            put("STRAT", new TradeObject(0d, 0.00099696));
             put("SYS", new TradeObject(0d, 0.00005699));
             put("VTC", new TradeObject(0d, 0.00047678));
             put("XEM", new TradeObject(0d, 0.00006047));
             put("XMR", new TradeObject(0d, 0.02411091));
-            put("XRP", new TradeObject(0d, 0.00008221));
+            put("XRP", new TradeObject(0d, 0.00008900));
             put("ZEC", new TradeObject(0d, 0.03446435));
         }};
 
-        public static final double AVAILABLE_BTC_FOR_TRADE_PERCENTAGE = 0.01;
+        public static final double AVAILABLE_BTC_FOR_TRADE_PERCENTAGE = 0.015;
         public static final double SELL_IF_DROPPED_PERCENTAGE = 0.99;
 
     }

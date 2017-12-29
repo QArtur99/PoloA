@@ -135,7 +135,7 @@ public class VolumeThread extends Thread implements VolumeMVP.Thread, VolumeMVP.
                 presenter.returnTradeHistory(key, PERIOD_30M);
                 Log.i(VolumeThread.class.getSimpleName() , key);
                 try {
-                    Thread.sleep(3001L);
+                    Thread.sleep(3501L);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

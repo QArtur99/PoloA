@@ -109,8 +109,10 @@ public class VolumeThread extends Thread implements VolumeMVP.Thread, VolumeMVP.
 
     @Override
     public void startThread() {
-        VolumeThread.this.setPriority(Thread.MAX_PRIORITY);
-        VolumeThread.this.start();
+        if(!VolumeThread.this.isAlive()) {
+            VolumeThread.this.setPriority(Thread.MAX_PRIORITY);
+            VolumeThread.this.start();
+        }
     }
 
     private class LoopTradeHistory24H extends TimerTask {

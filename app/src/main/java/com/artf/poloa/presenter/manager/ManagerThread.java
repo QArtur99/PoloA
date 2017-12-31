@@ -1,6 +1,7 @@
 package com.artf.poloa.presenter.manager;
 
 
+import android.app.Notification;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -9,6 +10,7 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.artf.poloa.R;
 import com.artf.poloa.data.database.Utility;
 import com.artf.poloa.data.entity.Buy;
 import com.artf.poloa.data.entity.TradeObject;
@@ -58,17 +60,31 @@ public class ManagerThread extends Service implements ManagerMVP.Thread, Manager
     }
 
     @Override
+    public void onCreate() {
+        super.onCreate();
+        Notification notification =
+                new Notification.Builder(getApplicationContext())
+                        .setContentTitle("PoloA")
+                        .setContentText("PoloA is running!")
+                        .setSmallIcon(R.mipmap.ic_launcher_round)
+                        .build();
+
+        startForeground(1, notification);
+    }
+
+    @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if(intent.getAction() != null && intent.getAction().equals(ACTION_START_SERVICE)) {
             ((App) getApplicationContext()).getComponent().inject(this);
 
             presenter.setThread(this);
             ccMap = Utility.loadHashMap(getApplicationContext());
 
             volumeThread.setDataReciver(this);
+            volumeThread.onStop();
             volumeThread.startThread();
 
             rmiThread.setDataReciver(this);
+            rmiThread.onStop();
             rmiThread.startThread();
 
             long delay = 1000L * Constant.PERIOD_3M;
@@ -76,8 +92,7 @@ public class ManagerThread extends Service implements ManagerMVP.Thread, Manager
             Timer timer = new Timer();
             timer.scheduleAtFixedRate(loopTask, delay, wait);
 
-        }
-        return START_REDELIVER_INTENT;
+        return START_STICKY;
     }
 
     @Override
@@ -157,8 +172,8 @@ public class ManagerThread extends Service implements ManagerMVP.Thread, Manager
 
         Type type = new TypeToken<HashMap<String, TradeObject>>() {}.getType();
         String jsonStringHashMap = new Gson().toJson(ccMap, type);
-        Utility.updateDatabase(getApplicationContext(), jsonStringHashMap);
-        Log.e(ManagerThread.class.getSimpleName(), "ccMap SAVE");
+        int rowsUpdated = Utility.updateDatabase(getApplicationContext(), jsonStringHashMap);
+        Log.e(ManagerThread.class.getSimpleName(), "ccMap SAVE updated rows:" + rowsUpdated);
     }
 
     @Override

@@ -31,6 +31,25 @@ public class MainActivity extends AppCompatActivity implements ManagerMVP.View {
 
     ManagerMVP.ThreadReceiver managerService;
     boolean mBound = false;
+    /**
+     * Defines callbacks for service binding, passed to bindService()
+     */
+    private ServiceConnection mConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className,
+                                       IBinder service) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            ManagerThread.LocalBinder binder = (ManagerThread.LocalBinder) service;
+            managerService = binder.getService();
+            mBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            mBound = false;
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +58,6 @@ public class MainActivity extends AppCompatActivity implements ManagerMVP.View {
         ButterKnife.bind(this);
     }
 
-
     @OnClick(R.id.startButton)
     public void startButton() {
         HashMap<String, TradeObject> ccMap = Settings.Trade.CC_LIST;
@@ -47,14 +65,14 @@ public class MainActivity extends AppCompatActivity implements ManagerMVP.View {
 
         Set<String> keys = ccMap.keySet();
         for (String key : keys) {
-            if(!ccMap2.containsKey(key)){
+            if (!ccMap2.containsKey(key)) {
                 ccMap2.put(key, ccMap.get(key));
             }
         }
 
         Set<String> keys2 = ccMap2.keySet();
         for (String key : keys2) {
-            if(!ccMap.containsKey(key)){
+            if (!ccMap.containsKey(key)) {
                 ccMap2.remove(key);
             }
         }
@@ -64,6 +82,7 @@ public class MainActivity extends AppCompatActivity implements ManagerMVP.View {
         Utility.updateDatabase(getApplicationContext(), jsonStringHashMap);
 
         ManagerThread.startService(this);
+
     }
 
     private boolean isMyServiceRunning(Class<?> serviceClass) {
@@ -71,16 +90,14 @@ public class MainActivity extends AppCompatActivity implements ManagerMVP.View {
         if (manager != null) {
             for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
                 if (serviceClass.getName().equals(service.service.getClassName())) {
-                    Log.i("isMyServiceRunning?", true+"");
+                    Log.i("isMyServiceRunning?", true + "");
                     return true;
                 }
             }
         }
-        Log.i("isMyServiceRunning?", false+"");
+        Log.i("isMyServiceRunning?", false + "");
         return false;
     }
-
-
 
     @OnClick(R.id.isAlive)
     public void isAlive() {
@@ -110,23 +127,5 @@ public class MainActivity extends AppCompatActivity implements ManagerMVP.View {
         unbindService(mConnection);
         mBound = false;
     }
-
-    /** Defines callbacks for service binding, passed to bindService() */
-    private ServiceConnection mConnection = new ServiceConnection() {
-
-        @Override
-        public void onServiceConnected(ComponentName className,
-                                       IBinder service) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
-            ManagerThread.LocalBinder binder = (ManagerThread.LocalBinder) service;
-            managerService = binder.getService();
-            mBound = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
-            mBound = false;
-        }
-    };
 
 }

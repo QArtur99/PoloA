@@ -41,11 +41,12 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
         db.insert(DatabaseContract.CoinMarketAnalysis.TABLE_NAME, null, mainValues);
     }
 
-    public void updateDatabase(SQLiteDatabase db, String data, String id) {
+    public int updateDatabase(SQLiteDatabase db, String data, String id) {
         ContentValues mainValues = new ContentValues();
         mainValues.put(DatabaseContract.CoinMarketAnalysis.DATA, data);
-        db.update(DatabaseContract.CoinMarketAnalysis.TABLE_NAME, mainValues, DatabaseContract.CoinMarketAnalysis._ID + "=" + id, null);
+        int rowsUpdated = db.update(DatabaseContract.CoinMarketAnalysis.TABLE_NAME, mainValues, DatabaseContract.CoinMarketAnalysis._ID + "=" + id, null);
         db.close();
+        return rowsUpdated;
     }
 
 

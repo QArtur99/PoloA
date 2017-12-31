@@ -238,8 +238,10 @@ public class RmiThread extends Thread implements RmiMVP.Thread, RmiMVP.ThreadUI 
 
     @Override
     public void startThread() {
-        RmiThread.this.setPriority(Thread.MAX_PRIORITY);
-        RmiThread.this.start();
+        if(!RmiThread.this.isAlive()) {
+            RmiThread.this.setPriority(Thread.MAX_PRIORITY);
+            RmiThread.this.start();
+        }
     }
 
     private class LoopTask extends TimerTask {

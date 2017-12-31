@@ -9,8 +9,8 @@ android {
     compileSdkVersion 26
     defaultConfig {
         applicationId "com.artf.poloa"
-        minSdkVersion 19
-        targetSdkVersion 26
+        minSdkVersion 24
+        targetSdkVersion 25
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"

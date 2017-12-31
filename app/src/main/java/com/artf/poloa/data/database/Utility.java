@@ -19,25 +19,28 @@ public class Utility {
         HashMap<String, TradeObject> ccMap = Settings.Trade.CC_LIST;
         SQLiteOpenHelper mainDatabase = new DatabaseHelper(context);
         SQLiteDatabase db = mainDatabase.getReadableDatabase();
-        Cursor cursor = null;
-        cursor = db.query(DatabaseContract.CoinMarketAnalysis.TABLE_NAME, DatabaseContract.CoinMarketAnalysis.projection, null, null, null, null, null);
+        Cursor cursor = db.query(DatabaseContract.CoinMarketAnalysis.TABLE_NAME, DatabaseContract.CoinMarketAnalysis.projection, null, null, null, null, null);
         if (cursor.moveToFirst()) {
-          ///  id = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseContract.CoinMarketAnalysis._ID));
-            String data = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseContract.CoinMarketAnalysis.DATA));
-            if (data.length() > 0) {
-                Type type = new TypeToken<HashMap<String, TradeObject>>() {}.getType();
-                ccMap = new Gson().fromJson(data, type);
+            do {
+                String id = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseContract.CoinMarketAnalysis._ID));
+                String data = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseContract.CoinMarketAnalysis.DATA));
+                if (id.equals("1") && data.length() > 0) {
+                    Type type = new TypeToken<HashMap<String, TradeObject>>() {}.getType();
+                    ccMap = new Gson().fromJson(data, type);
 
-            }
+                }
+            }while(cursor.moveToNext());
         }
+        cursor.close();
         return ccMap;
     }
 
-    public static void updateDatabase(Context context, String data) {
+    public static int updateDatabase(Context context, String data) {
         DatabaseHelper mainDatabase = new DatabaseHelper(context);
         SQLiteDatabase db = mainDatabase.getWritableDatabase();
-        mainDatabase.updateDatabase(db, data, "0");
+        int rowsUpdated = mainDatabase.updateDatabase(db, data, "1");
         db.close();
+        return rowsUpdated;
     }
 
 }

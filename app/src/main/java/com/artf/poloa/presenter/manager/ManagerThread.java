@@ -228,10 +228,10 @@ public class ManagerThread extends Service implements ManagerMVP.Thread, Manager
         double sellLock2 = to.rateOfLastBuy - (to.rateOfLastBuy * Settings.Trade.SELL_IF_DROPPED_PERCENTAGE);
         double sellLock3 = to.rateOfLastBuy + (to.rateOfLastBuy * 0.0269);
         double sellLock4 = to.rateOfLastBuy - (to.rateOfLastBuy * 0.10);
-        if (to.tradeMode.isBuy() && to.trend15m > Settings.Trend.RULE_LONG_TREND) {
+        if (to.tradeMode.isBuy() && Settings.RMI.OVER_SOLD > to.rmiSingal && to.trend15m > Settings.Trend.RULE_LONG_TREND) {
 
-            if (to.rmiValue > to.rmiSingal && 30 > to.rmiSingal && to.stochValue - to.stochSignal > 3 && 20 > to.stochSignal
-                    || to.rmiValue - to.rmiSingal > 3 && 30 > to.rmiSingal) {
+                if (to.rmiValue > to.rmiSingal && to.stochValue - to.stochSignal > 3 && 20 > to.stochSignal
+                        || to.rmiValue - to.rmiSingal > 3 ) {
 
                 double availableBTC = balanceBTC * Settings.Trade.AVAILABLE_BTC_FOR_TRADE_PERCENTAGE;
                 double rateForBuy = to.lastValueCC + (to.lastValueCC * 0.01);

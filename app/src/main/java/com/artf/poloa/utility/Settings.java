@@ -55,7 +55,7 @@ public class Settings {
         public static final int MOMENTUM = 4;
         public static final int SIGNAL = 3;
         public static final int OVER_BOUGHT = 70;
-        public static final int OVER_SOLD = 60;
+        public static final int OVER_SOLD = 30;
     }
 
     public static class Stochastic {

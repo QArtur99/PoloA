@@ -19,7 +19,6 @@ public interface RmiMVP {
     interface ThreadUI {
         void setDataReciver(ManagerMVP.ThreadReceiver threadReceiver);
         void startThread();
-        Boolean isItAlive();
         void onStop();
     }
 

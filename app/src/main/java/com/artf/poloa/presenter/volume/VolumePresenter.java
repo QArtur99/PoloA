@@ -20,6 +20,7 @@ public class VolumePresenter implements VolumeMVP.Presenter {
     private VolumeMVP.Thread thread;
     private VolumeMVP.Model model;
     private CompositeDisposable disposable = new CompositeDisposable();
+    private Scheduler scheduler;
 
     public VolumePresenter(VolumeMVP.Model model) {
         this.model = model;
@@ -27,12 +28,14 @@ public class VolumePresenter implements VolumeMVP.Presenter {
 
     @Override
     public void returnTradeHistory(String ccName, int timePeriod) {
-        int threadCount = Runtime.getRuntime().availableProcessors();
-        ExecutorService threadPoolExecutor = Executors.newFixedThreadPool(threadCount);
-        Scheduler scheduler = Schedulers.from(threadPoolExecutor);
+        if(scheduler == null) {
+            int threadCount = Runtime.getRuntime().availableProcessors();
+            ExecutorService threadPoolExecutor = Executors.newFixedThreadPool(threadCount);
+            scheduler = Schedulers.from(threadPoolExecutor);
+        }
 
-        DisposableObserver<WrapJSONArray> disposableObserver = model.returnTradeHistory(ccName, timePeriod).observeOn(scheduler).
-                subscribeOn(scheduler).subscribeWith(new DisposableObserver<WrapJSONArray>() {
+        DisposableObserver<WrapJSONArray> disposableObserver = model.returnTradeHistory(ccName, timePeriod).observeOn(Schedulers.io()).
+                subscribeOn(Schedulers.io()).subscribeWith(new DisposableObserver<WrapJSONArray>() {
 
             @Override
             public void onNext(@NonNull WrapJSONArray postParent) {

@@ -22,6 +22,7 @@ public class ManagerPresenter implements ManagerMVP.Presenter {
     private ManagerMVP.Thread thread;
     private ManagerMVP.Model model;
     private CompositeDisposable disposable = new CompositeDisposable();
+    private Scheduler scheduler;
 
     public ManagerPresenter(ManagerMVP.Model model) {
         this.model = model;
@@ -29,12 +30,14 @@ public class ManagerPresenter implements ManagerMVP.Presenter {
 
     @Override
     public void returnBalances() {
-        int threadCount = Runtime.getRuntime().availableProcessors();
-        ExecutorService threadPoolExecutor = Executors.newFixedThreadPool(threadCount);
-        Scheduler scheduler = Schedulers.from(threadPoolExecutor);
+        if(scheduler == null) {
+            int threadCount = Runtime.getRuntime().availableProcessors();
+            ExecutorService threadPoolExecutor = Executors.newFixedThreadPool(threadCount);
+            scheduler = Schedulers.from(threadPoolExecutor);
+        }
 
-        DisposableObserver<WrapJSONObject> disposableObserver = model.returnBalances().observeOn(scheduler).
-                subscribeOn(scheduler).subscribeWith(new DisposableObserver<WrapJSONObject>() {
+        DisposableObserver<WrapJSONObject> disposableObserver = model.returnBalances().observeOn(Schedulers.io()).
+                subscribeOn(Schedulers.io()).subscribeWith(new DisposableObserver<WrapJSONObject>() {
 
             @Override
             public void onNext(@NonNull WrapJSONObject postParent) {
@@ -60,12 +63,15 @@ public class ManagerPresenter implements ManagerMVP.Presenter {
     @Override
     public void buy(String ccName, double rate, double amount) {
         Log.e(ManagerPresenter.class.getSimpleName(), "BUY" + ccName);
-        int threadCount = Runtime.getRuntime().availableProcessors();
-        ExecutorService threadPoolExecutor = Executors.newFixedThreadPool(threadCount);
-        Scheduler scheduler = Schedulers.from(threadPoolExecutor);
 
-        DisposableObserver<Buy> disposableObserver = model.buy(ccName, rate, amount).observeOn(scheduler).
-                subscribeOn(scheduler).subscribeWith(new DisposableObserver<Buy>() {
+        if(scheduler == null) {
+            int threadCount = Runtime.getRuntime().availableProcessors();
+            ExecutorService threadPoolExecutor = Executors.newFixedThreadPool(threadCount);
+            scheduler = Schedulers.from(threadPoolExecutor);
+        }
+
+        DisposableObserver<Buy> disposableObserver = model.buy(ccName, rate, amount).observeOn(Schedulers.io()).
+                subscribeOn(Schedulers.io()).subscribeWith(new DisposableObserver<Buy>() {
 
             @Override
             public void onNext(@NonNull Buy postParent) {
@@ -92,12 +98,15 @@ public class ManagerPresenter implements ManagerMVP.Presenter {
     @Override
     public void sell(String type, String ccName, double rate, double amount) {
         Log.e(ManagerPresenter.class.getSimpleName(), "SELL" + ccName);
-        int threadCount = Runtime.getRuntime().availableProcessors();
-        ExecutorService threadPoolExecutor = Executors.newFixedThreadPool(threadCount);
-        Scheduler scheduler = Schedulers.from(threadPoolExecutor);
 
-        DisposableObserver<WrapJSONObject> disposableObserver = model.sell(type, ccName, rate, amount).observeOn(scheduler).
-                subscribeOn(scheduler).subscribeWith(new DisposableObserver<WrapJSONObject>() {
+        if(scheduler == null) {
+            int threadCount = Runtime.getRuntime().availableProcessors();
+            ExecutorService threadPoolExecutor = Executors.newFixedThreadPool(threadCount);
+            scheduler = Schedulers.from(threadPoolExecutor);
+        }
+
+        DisposableObserver<WrapJSONObject> disposableObserver = model.sell(type, ccName, rate, amount).observeOn(Schedulers.io()).
+                subscribeOn(Schedulers.io()).subscribeWith(new DisposableObserver<WrapJSONObject>() {
 
             @Override
             public void onNext(@NonNull WrapJSONObject postParent) {

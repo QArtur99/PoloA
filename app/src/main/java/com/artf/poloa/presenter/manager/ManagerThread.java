@@ -21,6 +21,7 @@ import com.artf.poloa.utility.Constant;
 import com.artf.poloa.utility.Mode;
 import com.artf.poloa.utility.Settings;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
@@ -47,7 +48,8 @@ public class ManagerThread extends Service implements ManagerMVP.Thread, Manager
     private double balanceBTC;
     private HashMap<String, TradeObject> ccMap;
     private ManagerMVP.View view;
-    private LoopTask loopTask = new LoopTask();
+    private LoopTask loopTask;
+    private Timer timer;
 
     public ManagerThread() {
         super();
@@ -74,31 +76,33 @@ public class ManagerThread extends Service implements ManagerMVP.Thread, Manager
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-            ((App) getApplicationContext()).getComponent().inject(this);
+        ((App) getApplicationContext()).getComponent().inject(this);
 
-            presenter.setThread(this);
-            ccMap = Utility.loadHashMap(getApplicationContext());
+        presenter.setThread(this);
+        ccMap = Utility.loadHashMap(getApplicationContext());
 
-            volumeThread.setDataReciver(this);
-            volumeThread.onStop();
-            volumeThread.startThread();
+        volumeThread.setDataReciver(this);
+        //      volumeThread.onStop();
+        volumeThread.startThread();
 
-            rmiThread.setDataReciver(this);
-            rmiThread.onStop();
-            rmiThread.startThread();
+        rmiThread.setDataReciver(this);
+        //     rmiThread.onStop();
+        rmiThread.startThread();
 
-            long delay = 1000L * Constant.PERIOD_3M;
-            long wait = 1000L * Constant.PERIOD_2M;
-            Timer timer = new Timer();
-            timer.scheduleAtFixedRate(loopTask, delay, wait);
+        long delay = 1000L * Constant.PERIOD_3M;
+        long wait = 1000L * Constant.PERIOD_2M;
+        if (loopTask != null) {
+            loopTask.cancel();
+        }
+        loopTask = new LoopTask();
+
+        if (timer != null) {
+            timer.cancel();
+        }
+        timer = new Timer();
+        timer.scheduleAtFixedRate(loopTask, delay, wait);
 
         return START_STICKY;
-    }
-
-    @Override
-    public Boolean isItAlive() {
-        return true;
-        //     return ManagerThread.this.isAlive();
     }
 
     @Override
@@ -171,7 +175,13 @@ public class ManagerThread extends Service implements ManagerMVP.Thread, Manager
         }
 
         Type type = new TypeToken<HashMap<String, TradeObject>>() {}.getType();
-        String jsonStringHashMap = new Gson().toJson(ccMap, type);
+
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.serializeSpecialFloatingPointValues();
+        Gson gson = gsonBuilder.setPrettyPrinting().create();
+        String jsonStringHashMap = gson.toJson(ccMap, type);
+
+        //      String jsonStringHashMap = new Gson().toJson(ccMap, type);
         int rowsUpdated = Utility.updateDatabase(getApplicationContext(), jsonStringHashMap);
         Log.e(ManagerThread.class.getSimpleName(), "ccMap SAVE updated rows:" + rowsUpdated);
     }
@@ -227,17 +237,20 @@ public class ManagerThread extends Service implements ManagerMVP.Thread, Manager
         double sellLock = to.rateOfLastBuy + (to.rateOfLastBuy * 0.0169);
         double sellLock2 = to.rateOfLastBuy - (to.rateOfLastBuy * Settings.Trade.SELL_IF_DROPPED_PERCENTAGE);
         double sellLock3 = to.rateOfLastBuy + (to.rateOfLastBuy * 0.0269);
-        double sellLock4 = to.rateOfLastBuy - (to.rateOfLastBuy * 0.10);
+        double sellLock4 = to.rateOfLastBuy - (to.rateOfLastBuy * 0.15);
+
         if (to.tradeMode.isBuy() && Settings.RMI.OVER_SOLD > to.rmiSingal && to.trend15m > Settings.Trend.RULE_LONG_TREND) {
 
-                if (to.rmiValue > to.rmiSingal && to.stochValue - to.stochSignal > 3 && 20 > to.stochSignal
-                        || to.rmiValue - to.rmiSingal > 3 ) {
+            if (to.rmiValue > to.rmiSingal && to.stochValue - to.stochSignal > 3 && 20 > to.stochSignal
+                    || to.rmiValue - to.rmiSingal > 3) {
 
                 double availableBTC = balanceBTC * Settings.Trade.AVAILABLE_BTC_FOR_TRADE_PERCENTAGE;
-                double rateForBuy = to.lastValueCC + (to.lastValueCC * 0.01);
-                double amount = availableBTC / rateForBuy;
-                ccMap.get(ccName).rateOfLastBuy = rateForBuy;
-                presenter.buy(ccName, rateForBuy, amount);
+                if (availableBTC > Constant.VALID_AMOUNT_OF_BTC * 1.5) {
+                    double rateForBuy = to.lastValueCC + (to.lastValueCC * 0.01);
+                    double amount = availableBTC / rateForBuy;
+                    ccMap.get(ccName).rateOfLastBuy = rateForBuy;
+                    presenter.buy(ccName, rateForBuy, amount);
+                }
             }
         } else if (to.tradeMode.isSell() && to.rmiSingal > to.rmiValue && to.rmiSingal - to.rmiValue > 3 && to.lastValueCC > sellLock
                 || to.tradeMode.isSell() && to.rmiSingal > to.rmiValue && to.rmiSingal - to.rmiValue > 3 && sellLock2 > to.lastValueCC

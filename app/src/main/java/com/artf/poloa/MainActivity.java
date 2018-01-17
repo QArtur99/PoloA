@@ -58,6 +58,11 @@ public class MainActivity extends AppCompatActivity implements ManagerMVP.View {
         ButterKnife.bind(this);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
     @OnClick(R.id.startButton)
     public void startButton() {
         HashMap<String, TradeObject> ccMap = Settings.Trade.CC_LIST;

@@ -39,11 +39,6 @@ public class VolumeThread extends Thread implements VolumeMVP.Thread, VolumeMVP.
         ccMap = Settings.Trade.CC_LIST;
     }
 
-    @Override
-    public Boolean isItAlive(){
-        return VolumeThread.this.isAlive();
-    }
-
 
     @Override
     public void run() {
@@ -109,7 +104,7 @@ public class VolumeThread extends Thread implements VolumeMVP.Thread, VolumeMVP.
 
     @Override
     public void startThread() {
-        if(!VolumeThread.this.isAlive()) {
+        if (VolumeThread.this.getState() == Thread.State.NEW){
             VolumeThread.this.setPriority(Thread.MAX_PRIORITY);
             VolumeThread.this.start();
         }

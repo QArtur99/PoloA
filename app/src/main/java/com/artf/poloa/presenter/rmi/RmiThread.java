@@ -49,12 +49,6 @@ public class RmiThread extends Thread implements RmiMVP.Thread, RmiMVP.ThreadUI 
     }
 
     @Override
-    public Boolean isItAlive(){
-        return RmiThread.this.isAlive();
-    }
-
-
-    @Override
     public void run() {
         long wait = 1000L * Constant.PERIOD_3M;
         Timer timer = new Timer();
@@ -238,7 +232,7 @@ public class RmiThread extends Thread implements RmiMVP.Thread, RmiMVP.ThreadUI 
 
     @Override
     public void startThread() {
-        if(!RmiThread.this.isAlive()) {
+        if (RmiThread.this.getState() == Thread.State.NEW){
             RmiThread.this.setPriority(Thread.MAX_PRIORITY);
             RmiThread.this.start();
         }

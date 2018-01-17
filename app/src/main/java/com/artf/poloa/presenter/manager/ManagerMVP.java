@@ -31,7 +31,6 @@ public interface ManagerMVP {
         void setStochasticData(String ccName, double rmiValue, double rmiSingal);
         void setView(ManagerMVP.View view);
         void startThread();
-        Boolean isItAlive();
         int getRandomNumber();
         void onStop();
         void setLastValue(String ccName, double close);

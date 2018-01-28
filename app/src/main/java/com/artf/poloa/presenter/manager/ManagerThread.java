@@ -82,23 +82,22 @@ public class ManagerThread extends Service implements ManagerMVP.Thread, Manager
         ccMap = Utility.loadHashMap(getApplicationContext());
 
         volumeThread.setDataReciver(this);
-        //      volumeThread.onStop();
         volumeThread.startThread();
 
         rmiThread.setDataReciver(this);
-        //     rmiThread.onStop();
         rmiThread.startThread();
 
-        long delay = 1000L * Constant.PERIOD_3M;
-        long wait = 1000L * Constant.PERIOD_2M;
         if (loopTask != null) {
             loopTask.cancel();
         }
-        loopTask = new LoopTask();
 
         if (timer != null) {
             timer.cancel();
         }
+
+        long delay = 1000L * Constant.PERIOD_3M;
+        long wait = 1000L * Constant.PERIOD_2M;
+        loopTask = new LoopTask();
         timer = new Timer();
         timer.scheduleAtFixedRate(loopTask, delay, wait);
 
@@ -252,17 +251,20 @@ public class ManagerThread extends Service implements ManagerMVP.Thread, Manager
                     presenter.buy(ccName, rateForBuy, amount);
                 }
             }
-        } else if (to.tradeMode.isSell() && to.rmiSingal > to.rmiValue && to.rmiSingal - to.rmiValue > 3 && to.lastValueCC > sellLock
-                || to.tradeMode.isSell() && to.rmiSingal > to.rmiValue && to.rmiSingal - to.rmiValue > 3 && sellLock2 > to.lastValueCC
-                || to.tradeMode.isSell() && to.rmiSingal > to.rmiValue && to.rmiSingal - to.rmiValue > 3 && sellLock4 > to.lastValueCC
-                || to.tradeMode.isSell() && to.lastValueCC > sellLock3 && to.rmiSingal - to.rmiValue > 1) {
+        } else if (to.tradeMode.isSell()) {
 
-            if (sellLock4 > to.lastValueCC) {
-                double rateForSell = to.rateOfLastBuy + (to.rateOfLastBuy * 0.05);
-                presenter.sell(Constant.POST_ONLY, ccName, rateForSell, to.balanceSelectedCC);
-            } else {
-                double rateForSell = to.lastValueCC - (to.lastValueCC * 0.01);
-                presenter.sell(Constant.FILL_OR_KILL, ccName, rateForSell, to.balanceSelectedCC);
+            if (to.rmiSingal - to.rmiValue > 3 && to.lastValueCC > sellLock
+                    || to.rmiSingal - to.rmiValue > 3 && sellLock2 > to.lastValueCC
+                    || to.rmiSingal - to.rmiValue > 3 && sellLock4 > to.lastValueCC
+                    || to.lastValueCC > sellLock3 && to.stochSignal - to.stochValue > 1) {
+
+                if (sellLock4 > to.lastValueCC) {
+                    double rateForSell = to.rateOfLastBuy + (to.rateOfLastBuy * 0.05);
+                    presenter.sell(Constant.POST_ONLY, ccName, rateForSell, to.balanceSelectedCC);
+                } else {
+                    double rateForSell = to.lastValueCC - (to.lastValueCC * 0.01);
+                    presenter.sell(Constant.FILL_OR_KILL, ccName, rateForSell, to.balanceSelectedCC);
+                }
             }
         }
     }

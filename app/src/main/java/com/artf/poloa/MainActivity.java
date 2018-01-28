@@ -37,8 +37,7 @@ public class MainActivity extends AppCompatActivity implements ManagerMVP.View {
     private ServiceConnection mConnection = new ServiceConnection() {
 
         @Override
-        public void onServiceConnected(ComponentName className,
-                                       IBinder service) {
+        public void onServiceConnected(ComponentName className, IBinder service) {
             // We've bound to LocalService, cast the IBinder and get LocalService instance
             ManagerThread.LocalBinder binder = (ManagerThread.LocalBinder) service;
             managerService = binder.getService();
@@ -87,7 +86,6 @@ public class MainActivity extends AppCompatActivity implements ManagerMVP.View {
         Utility.updateDatabase(getApplicationContext(), jsonStringHashMap);
 
         ManagerThread.startService(this);
-
     }
 
     private boolean isMyServiceRunning(Class<?> serviceClass) {
@@ -115,9 +113,7 @@ public class MainActivity extends AppCompatActivity implements ManagerMVP.View {
     }
 
     @Override
-    public void onBackPressed() {
-//        MainActivity.this.finish();
-    }
+    public void onBackPressed() {}
 
     @Override
     protected void onStart() {

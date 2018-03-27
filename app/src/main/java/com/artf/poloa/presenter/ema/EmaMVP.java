@@ -1,11 +1,11 @@
-package com.artf.poloa.presenter.volume;
+package com.artf.poloa.presenter.ema;
 
 import com.artf.poloa.data.entity.WrapJSONArray;
 import com.artf.poloa.presenter.manager.ManagerMVP;
 
 import io.reactivex.Observable;
 
-public interface VolumeMVP {
+public interface EmaMVP {
 
 
     interface View {
@@ -13,7 +13,7 @@ public interface VolumeMVP {
     }
 
     interface Thread {
-        void returnTradeHistory(WrapJSONArray wrapJSONArray);
+        void returnChartData(WrapJSONArray jsonArray);
     }
 
     interface ThreadUI {
@@ -24,12 +24,12 @@ public interface VolumeMVP {
 
 
     interface Presenter {
-        void returnTradeHistory(String ccName, int timePeriod);
-        void setThread(VolumeMVP.Thread thread);
+        void returnChartData(String ccName, int timePeriod);
+        void setThread(EmaMVP.Thread thread);
         void onStop();
     }
 
     interface Model {
-        Observable<WrapJSONArray> returnTradeHistory(String ccName, int timePeriod);
+        Observable<WrapJSONArray> returnChartData(String ccName, int timePeriod);;
     }
 }

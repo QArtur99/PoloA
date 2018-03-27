@@ -3,9 +3,9 @@ package com.artf.poloa.presenter.root;
 import android.app.Application;
 
 import com.artf.poloa.data.network.RetrofitModule;
+import com.artf.poloa.presenter.ema.EmaModule;
 import com.artf.poloa.presenter.manager.ManagerModule;
 import com.artf.poloa.presenter.rmi.RmiModule;
-import com.artf.poloa.presenter.volume.VolumeModule;
 
 public class App extends Application {
 
@@ -18,7 +18,7 @@ public class App extends Application {
         component = DaggerApplicationComponent.builder()
                 .applicationModule(new ApplicationModule(this))
                 .managerModule(new ManagerModule())
-                .volumeModule(new VolumeModule())
+                .emaModule(new EmaModule())
                 .rmiModule(new RmiModule())
                 .retrofitModule(new RetrofitModule())
                 .build();

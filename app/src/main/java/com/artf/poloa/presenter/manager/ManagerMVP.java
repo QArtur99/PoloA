@@ -25,14 +25,10 @@ public interface ManagerMVP {
     }
 
     interface ThreadReceiver {
+        void setEmaData(String ccName, double emaValue);
         void setRmiData(String ccName, double rmiValue, double rmiSingal);
-        void setTradeHistory24H(String ccName, double trend24H);
-        void setTradeHistory15m(String ccName, double trend15m);
-        void setStochasticData(String ccName, double rmiValue, double rmiSingal);
         void setView(ManagerMVP.View view);
-        void startThread();
         int getRandomNumber();
-        void onStop();
         void setLastValue(String ccName, double close);
     }
 

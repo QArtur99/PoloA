@@ -53,4 +53,5 @@ dependencies {
     //http logging
     implementation 'com.squareup.okhttp3:logging-interceptor:3.4.2'
     implementation 'org.glassfish.main:javax.annotation:4.0-b33'
+    debugImplementation 'com.amitshekhar.android:debug-db:1.0.3'
 }

@@ -1,4 +1,4 @@
-package com.artf.poloa.presenter.volume;
+package com.artf.poloa.presenter.ema;
 
 import android.support.annotation.Nullable;
 
@@ -14,33 +14,33 @@ import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
 
 
-public class VolumePresenter implements VolumeMVP.Presenter {
+public class EmaPresenter implements EmaMVP.Presenter {
 
     @Nullable
-    private VolumeMVP.Thread thread;
-    private VolumeMVP.Model model;
+    private EmaMVP.Thread thread;
+    private EmaMVP.Model model;
     private CompositeDisposable disposable = new CompositeDisposable();
-    private Scheduler scheduler;
 
-    public VolumePresenter(VolumeMVP.Model model) {
+    public EmaPresenter(EmaMVP.Model model) {
         this.model = model;
     }
+    private Scheduler scheduler;
 
     @Override
-    public void returnTradeHistory(String ccName, int timePeriod) {
+    public void returnChartData(String ccName, int timePeriod) {
         if(scheduler == null) {
             int threadCount = Runtime.getRuntime().availableProcessors();
             ExecutorService threadPoolExecutor = Executors.newFixedThreadPool(threadCount);
             scheduler = Schedulers.from(threadPoolExecutor);
         }
 
-        DisposableObserver<WrapJSONArray> disposableObserver = model.returnTradeHistory(ccName, timePeriod).observeOn(Schedulers.io()).
+        DisposableObserver<WrapJSONArray> disposableObserver = model.returnChartData(ccName, timePeriod).observeOn(Schedulers.io()).
                 subscribeOn(Schedulers.io()).subscribeWith(new DisposableObserver<WrapJSONArray>() {
 
             @Override
             public void onNext(@NonNull WrapJSONArray postParent) {
                 if (thread != null) {
-                    thread.returnTradeHistory(postParent);
+                    thread.returnChartData(postParent);
                 }
             }
 
@@ -65,7 +65,7 @@ public class VolumePresenter implements VolumeMVP.Presenter {
 
 
     @Override
-    public void setThread(VolumeMVP.Thread thread) {
+    public void setThread(EmaMVP.Thread thread) {
         this.thread = thread;
     }
 }

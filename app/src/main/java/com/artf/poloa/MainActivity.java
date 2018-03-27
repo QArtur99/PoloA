@@ -55,6 +55,7 @@ public class MainActivity extends AppCompatActivity implements ManagerMVP.View {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+        //this.deleteDatabase("PoloA.db");
     }
 
     @Override

@@ -14,14 +14,13 @@ import com.artf.poloa.R;
 import com.artf.poloa.data.database.Utility;
 import com.artf.poloa.data.entity.Buy;
 import com.artf.poloa.data.entity.TradeObject;
+import com.artf.poloa.presenter.ema.EmaMVP;
 import com.artf.poloa.presenter.rmi.RmiMVP;
 import com.artf.poloa.presenter.root.App;
-import com.artf.poloa.presenter.volume.VolumeMVP;
 import com.artf.poloa.utility.Constant;
 import com.artf.poloa.utility.Mode;
 import com.artf.poloa.utility.Settings;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
@@ -44,7 +43,7 @@ public class ManagerThread extends Service implements ManagerMVP.Thread, Manager
     @Inject
     RmiMVP.ThreadUI rmiThread;
     @Inject
-    VolumeMVP.ThreadUI volumeThread;
+    EmaMVP.ThreadUI emaThread;
     private double balanceBTC;
     private HashMap<String, TradeObject> ccMap;
     private ManagerMVP.View view;
@@ -81,8 +80,8 @@ public class ManagerThread extends Service implements ManagerMVP.Thread, Manager
         presenter.setThread(this);
         ccMap = Utility.loadHashMap(getApplicationContext());
 
-        volumeThread.setDataReciver(this);
-        volumeThread.startThread();
+        emaThread.setDataReciver(this);
+        emaThread.startThread();
 
         rmiThread.setDataReciver(this);
         rmiThread.startThread();
@@ -105,35 +104,15 @@ public class ManagerThread extends Service implements ManagerMVP.Thread, Manager
     }
 
     @Override
+    public void setEmaData(String ccName, double emaValue) {
+        ccMap.get(ccName).emaValue = emaValue;
+        double x = emaValue;
+    }
+
+    @Override
     public void setRmiData(String ccName, double rmiValue, double rmiSingal) {
         ccMap.get(ccName).rmiValue = rmiValue;
         ccMap.get(ccName).rmiSingal = rmiSingal;
-    }
-
-    @Override
-    public void setTradeHistory24H(String ccName, double trend24H) {
-        ccMap.get(ccName).trend24H = trend24H;
-    }
-
-    @Override
-    public void setTradeHistory15m(String ccName, double trend15m) {
-        ccMap.get(ccName).trend15m = trend15m;
-
-    }
-
-    @Override
-    public void setStochasticData(String ccName, double stochValue, double stochSignal) {
-        ccMap.get(ccName).stochValue = stochValue;
-        ccMap.get(ccName).stochSignal = stochSignal;
-    }
-
-    @Override
-    public void onStop() {
-
-
-//        if (disposable != null && !disposable.isDisposed()) {
-//            disposable.dispose();
-//        }
     }
 
     @Override
@@ -149,11 +128,6 @@ public class ManagerThread extends Service implements ManagerMVP.Thread, Manager
     }
 
     @Override
-    public void startThread() {
-
-    }
-
-    @Override
     public synchronized void returnBalances(JsonObject jsonObject) {
         balanceBTC = jsonObject.get(Constant.BTC_NAME).getAsDouble();
         Set<String> keys = ccMap.keySet();
@@ -164,7 +138,7 @@ public class ManagerThread extends Service implements ManagerMVP.Thread, Manager
             } else {
                 ccMap.get(key).tradeMode = Mode.BUY;
             }
-            startBot(key, ccMap.get(key));
+            //  startBot(key, ccMap.get(key));
 
             try {
                 Thread.sleep(1001L);
@@ -174,13 +148,7 @@ public class ManagerThread extends Service implements ManagerMVP.Thread, Manager
         }
 
         Type type = new TypeToken<HashMap<String, TradeObject>>() {}.getType();
-
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.serializeSpecialFloatingPointValues();
-        Gson gson = gsonBuilder.setPrettyPrinting().create();
-        String jsonStringHashMap = gson.toJson(ccMap, type);
-
-        //      String jsonStringHashMap = new Gson().toJson(ccMap, type);
+        String jsonStringHashMap = new Gson().toJson(ccMap, type);
         int rowsUpdated = Utility.updateDatabase(getApplicationContext(), jsonStringHashMap);
         Log.e(ManagerThread.class.getSimpleName(), "ccMap SAVE updated rows:" + rowsUpdated);
     }
@@ -235,16 +203,15 @@ public class ManagerThread extends Service implements ManagerMVP.Thread, Manager
     private void startBot(String ccName, TradeObject to) {
         double sellLock = to.rateOfLastBuy + (to.rateOfLastBuy * 0.0169);
         double sellLock2 = to.rateOfLastBuy - (to.rateOfLastBuy * Settings.Trade.SELL_IF_DROPPED_PERCENTAGE);
-        double sellLock3 = to.rateOfLastBuy + (to.rateOfLastBuy * 0.0269);
-        double sellLock4 = to.rateOfLastBuy - (to.rateOfLastBuy * 0.15);
 
-        if (to.tradeMode.isBuy() && Settings.RMI.OVER_SOLD > to.rmiSingal && to.trend15m > Settings.Trend.RULE_LONG_TREND) {
+        if (to.tradeMode.isBuy() && Settings.RMI.OVER_SOLD > to.rmiSingal) {
 
-            if (to.rmiValue > to.rmiSingal && to.stochValue - to.stochSignal > 3 && 20 > to.stochSignal
-                    || to.rmiValue - to.rmiSingal > 3) {
+
+            if (to.rmiValue - to.rmiSingal > Settings.RMI.RMI_OVER_SIGNAL
+                    && to.emaValue * Settings.EMA.PERCENTAGE_VALUE / 100 > to.lastValueCC) {
 
                 double availableBTC = balanceBTC * Settings.Trade.AVAILABLE_BTC_FOR_TRADE_PERCENTAGE;
-                if (availableBTC > Constant.VALID_AMOUNT_OF_BTC * 1.5) {
+                if (availableBTC > Constant.VALID_AMOUNT_OF_BTC) {
                     double rateForBuy = to.lastValueCC + (to.lastValueCC * 0.01);
                     double amount = availableBTC / rateForBuy;
                     ccMap.get(ccName).rateOfLastBuy = rateForBuy;
@@ -253,19 +220,20 @@ public class ManagerThread extends Service implements ManagerMVP.Thread, Manager
             }
         } else if (to.tradeMode.isSell()) {
 
-            if (to.rmiSingal - to.rmiValue > 3 && to.lastValueCC > sellLock
-                    || to.rmiSingal - to.rmiValue > 3 && sellLock2 > to.lastValueCC
-                    || to.rmiSingal - to.rmiValue > 3 && sellLock4 > to.lastValueCC
-                    || to.lastValueCC > sellLock3 && to.stochSignal - to.stochValue > 1) {
+            if (!Settings.Trade.CAN_I_LOSE) {
+                if (to.lastValueCC < sellLock) {
+                    return;
+                }
+            }
 
-                if (sellLock4 > to.lastValueCC) {
-                    double rateForSell = to.rateOfLastBuy + (to.rateOfLastBuy * 0.05);
-                    presenter.sell(Constant.POST_ONLY, ccName, rateForSell, to.balanceSelectedCC);
-                } else {
+            if (to.rmiSingal > Settings.RMI.OVER_BOUGHT || sellLock2 > to.lastValueCC) {
+
+                if (to.rmiSingal - to.rmiValue > Settings.RMI.SIGNAL_OVER_RMI) {
                     double rateForSell = to.lastValueCC - (to.lastValueCC * 0.01);
                     presenter.sell(Constant.FILL_OR_KILL, ccName, rateForSell, to.balanceSelectedCC);
                 }
             }
+
         }
     }
 
@@ -275,9 +243,6 @@ public class ManagerThread extends Service implements ManagerMVP.Thread, Manager
         return mBinder;
     }
 
-    /**
-     * method for clients
-     */
     public int getRandomNumber() {
         return new Random().nextInt(100);
     }

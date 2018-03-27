@@ -90,7 +90,7 @@ public class PoloniexPublicApi implements DataRepository.PublicAPI {
 //        args.put("currencyPair", Settings.Trade.CC_NAME_PAIR);
         args.put("currencyPair", "BTC_" + ccName);
         args.put("period", String.valueOf(timePeriod));
-        args.put("start", String.valueOf(unixTime - (timePeriod * 140)));
+        args.put("start", String.valueOf(unixTime - (timePeriod * 240)));
         args.put("end", String.valueOf(unixTime));
 
         return poloniexPublicAPI.returnChartData(args).flatMap(new Function<WrapJSONArray, ObservableSource<WrapJSONArray>>() {

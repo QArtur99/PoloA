@@ -138,7 +138,7 @@ public class ManagerThread extends Service implements ManagerMVP.Thread, Manager
             } else {
                 ccMap.get(key).tradeMode = Mode.BUY;
             }
-            //  startBot(key, ccMap.get(key));
+            //startBot(key, ccMap.get(key));
 
             try {
                 Thread.sleep(1001L);
@@ -201,8 +201,8 @@ public class ManagerThread extends Service implements ManagerMVP.Thread, Manager
     }
 
     private void startBot(String ccName, TradeObject to) {
-        double sellLock = to.rateOfLastBuy + (to.rateOfLastBuy * 0.0169);
-        double sellLock2 = to.rateOfLastBuy - (to.rateOfLastBuy * Settings.Trade.SELL_IF_DROPPED_PERCENTAGE);
+        double sellLock = to.rateOfLastBuy + (to.rateOfLastBuy * Settings.Trade.SELL_IF_RAISED_PERCENTAGE / 100);
+        double sellLock2 = to.rateOfLastBuy - (to.rateOfLastBuy * Settings.Trade.SELL_IF_DROPPED_PERCENTAGE / 100);
 
         if (to.tradeMode.isBuy() && Settings.RMI.OVER_SOLD > to.rmiSingal) {
 
@@ -210,7 +210,7 @@ public class ManagerThread extends Service implements ManagerMVP.Thread, Manager
             if (to.rmiValue - to.rmiSingal > Settings.RMI.RMI_OVER_SIGNAL
                     && to.emaValue * Settings.EMA.PERCENTAGE_VALUE / 100 > to.lastValueCC) {
 
-                double availableBTC = balanceBTC * Settings.Trade.AVAILABLE_BTC_FOR_TRADE_PERCENTAGE;
+                double availableBTC = balanceBTC * Settings.Trade.AVAILABLE_BTC_FOR_TRADE_PERCENTAGE / 100;
                 if (availableBTC > Constant.VALID_AMOUNT_OF_BTC) {
                     double rateForBuy = to.lastValueCC + (to.lastValueCC * 0.01);
                     double amount = availableBTC / rateForBuy;
@@ -219,14 +219,17 @@ public class ManagerThread extends Service implements ManagerMVP.Thread, Manager
                 }
             }
         } else if (to.tradeMode.isSell()) {
+            boolean exitS1, exitS2;
 
-            if (!Settings.Trade.CAN_I_LOSE) {
-                if (to.lastValueCC < sellLock) {
-                    return;
-                }
+            if (Settings.Trade.CAN_I_LOSE) {
+                exitS1 = to.rmiValue > Settings.RMI.OVER_BOUGHT;
+                exitS2 = sellLock2 > to.lastValueCC && to.rmiValue > Settings.Trade.OVER_BOUGHT_SELL_IF_DROPPED_PERCENTAGE;
+            }else {
+                exitS1 = to.lastValueCC < sellLock;
+                exitS2 = false;
             }
 
-            if (to.rmiSingal > Settings.RMI.OVER_BOUGHT || sellLock2 > to.lastValueCC) {
+            if (exitS1 || exitS2) {
 
                 if (to.rmiSingal - to.rmiValue > Settings.RMI.SIGNAL_OVER_RMI) {
                     double rateForSell = to.lastValueCC - (to.lastValueCC * 0.01);

@@ -68,13 +68,10 @@ public class PoloniexPublicApi implements DataRepository.PublicAPI {
         args.put("currencyPair", "BTC_" + ccName);
         args.put("start", String.valueOf(unixTime - (timePeriod)));
         args.put("end", String.valueOf(unixTime));
-        return poloniexPublicAPI.returnTradeHistory(args).flatMap(new Function<WrapJSONArray, ObservableSource<WrapJSONArray>>() {
-            @Override
-            public ObservableSource<WrapJSONArray> apply(WrapJSONArray wrapJSONArray) throws Exception {
-                wrapJSONArray.ccName = ccName;
-                wrapJSONArray.periodTime = timePeriod;
-                return Observable.just(wrapJSONArray);
-            }
+        return poloniexPublicAPI.returnTradeHistory(args).flatMap((Function<WrapJSONArray, ObservableSource<WrapJSONArray>>) wrapJSONArray -> {
+            wrapJSONArray.ccName = ccName;
+            wrapJSONArray.periodTime = timePeriod;
+            return Observable.just(wrapJSONArray);
         });
     }
 
@@ -87,18 +84,15 @@ public class PoloniexPublicApi implements DataRepository.PublicAPI {
         long unixTime = System.currentTimeMillis() / 1000L;
         HashMap<String, String> args = new HashMap<>();
         args.put("command", "returnChartData");
-//        args.put("currencyPair", Settings.Trade.CC_NAME_PAIR);
         args.put("currencyPair", "BTC_" + ccName);
         args.put("period", String.valueOf(timePeriod));
         args.put("start", String.valueOf(unixTime - (timePeriod * 240)));
         args.put("end", String.valueOf(unixTime));
 
-        return poloniexPublicAPI.returnChartData(args).flatMap(new Function<WrapJSONArray, ObservableSource<WrapJSONArray>>() {
-            @Override
-            public ObservableSource<WrapJSONArray> apply(WrapJSONArray wrapJSONArray) throws Exception {
-                wrapJSONArray.ccName = ccName;
-                return Observable.just(wrapJSONArray);
-            }
+        return poloniexPublicAPI.returnChartData(args)
+                .flatMap((Function<WrapJSONArray, ObservableSource<WrapJSONArray>>) wrapJSONArray -> {
+            wrapJSONArray.ccName = ccName;
+            return Observable.just(wrapJSONArray);
         });
     }
 

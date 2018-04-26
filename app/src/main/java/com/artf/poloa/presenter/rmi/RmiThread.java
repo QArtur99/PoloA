@@ -92,8 +92,8 @@ public class RmiThread extends Thread implements RmiMVP.Thread, RmiMVP.ThreadUI 
             dnMaxList.clear();
             upMaxList.addAll(upMax);
             dnMaxList.addAll(dnMax);
-            upEma.addLast(ema2(upMaxList, Settings.RMI.LENHTH));
-            dnEma.addLast(ema2(dnMaxList, Settings.RMI.LENHTH));
+            upEma.addLast(sma(upMaxList, Settings.RMI.LENGTH));
+            dnEma.addLast(sma(dnMaxList, Settings.RMI.LENGTH));
             upMax.removeFirst();
             dnMax.removeFirst();
         }
@@ -133,6 +133,14 @@ public class RmiThread extends Thread implements RmiMVP.Thread, RmiMVP.ThreadUI 
             sum += value;
         }
         return sum / list.size();
+    }
+
+    private double sma(List<Double> list, int length) {
+        double sum = 0;
+        for (int i = 0; length > i; i++) {
+            sum += list.get(i);
+        }
+        return sum / length;
     }
 
 

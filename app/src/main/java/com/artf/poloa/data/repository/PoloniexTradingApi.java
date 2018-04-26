@@ -91,12 +91,9 @@ public class PoloniexTradingApi implements DataRepository.TradingAPI {
         String postData = Utility.getUri(args);
         String signature = Utility.getSignature(SECRET_KEY, postData);
 
-        return poloniexTradingAPI.buy(KEY, signature, args).flatMap(new Function<Buy, ObservableSource<Buy>>() {
-            @Override
-            public ObservableSource<Buy> apply(Buy wrapJSONArray) throws Exception {
-                wrapJSONArray.ccName = ccName;
-                return Observable.just(wrapJSONArray);
-            }
+        return poloniexTradingAPI.buy(KEY, signature, args).flatMap((Function<Buy, ObservableSource<Buy>>) wrapJSONArray -> {
+            wrapJSONArray.ccName = ccName;
+            return Observable.just(wrapJSONArray);
         });
     }
 
@@ -117,12 +114,9 @@ public class PoloniexTradingApi implements DataRepository.TradingAPI {
         String postData = Utility.getUri(args);
         String signature = Utility.getSignature(SECRET_KEY, postData);
 
-        return poloniexTradingAPI.sell(KEY, signature, args).flatMap(new Function<WrapJSONObject, ObservableSource<WrapJSONObject>>() {
-            @Override
-            public ObservableSource<WrapJSONObject> apply(WrapJSONObject wrapJSONArray) throws Exception {
-                wrapJSONArray.ccName = ccName;
-                return Observable.just(wrapJSONArray);
-            }
+        return poloniexTradingAPI.sell(KEY, signature, args).flatMap((Function<WrapJSONObject, ObservableSource<WrapJSONObject>>) wrapJSONArray -> {
+            wrapJSONArray.ccName = ccName;
+            return Observable.just(wrapJSONArray);
         });
     }
 

@@ -1,8 +1,11 @@
 package com.artf.poloa.presenter.manager;
 
 import com.artf.poloa.data.entity.Buy;
+import com.artf.poloa.data.entity.TradeObject;
 import com.artf.poloa.data.entity.WrapJSONObject;
 import com.google.gson.JsonObject;
+
+import java.util.HashMap;
 
 import io.reactivex.Observable;
 
@@ -28,7 +31,7 @@ public interface ManagerMVP {
         void setEmaData(String ccName, double emaValue);
         void setRmiData(String ccName, double rmiValue, double rmiSingal);
         void setView(ManagerMVP.View view);
-        int getRandomNumber();
+        HashMap<String, TradeObject> getCcMap();
         void setLastValue(String ccName, double close);
     }
 

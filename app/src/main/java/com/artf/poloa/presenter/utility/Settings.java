@@ -1,4 +1,4 @@
-package com.artf.poloa.utility;
+package com.artf.poloa.presenter.utility;
 
 import com.artf.poloa.data.entity.TradeObject;
 
@@ -8,6 +8,14 @@ public class Settings {
 
     public static class Trade {
         public static final HashMap<String, TradeObject> CC_LIST = new HashMap<String, TradeObject>() {{
+            put("BCH", new TradeObject(0d, 0.02411091));
+            put("DASH", new TradeObject(0d, 0.02411091));
+            put("ETC", new TradeObject(0d, 0.02411091));
+            put("ETH", new TradeObject(0d, 0.02411091));
+            put("LTC", new TradeObject(0d, 0.02411091));
+            put("OMG", new TradeObject(0d, 0.02411091));
+            put("STR", new TradeObject(0d, 0.02411091));
+            put("XEM", new TradeObject(0d, 0.02411091));
             put("XMR", new TradeObject(0d, 0.02411091));
             put("XRP", new TradeObject(0d, 0.00008900));
         }};

@@ -17,16 +17,15 @@ import com.artf.poloa.data.entity.TradeObject;
 import com.artf.poloa.presenter.ema.EmaMVP;
 import com.artf.poloa.presenter.rmi.RmiMVP;
 import com.artf.poloa.presenter.root.App;
-import com.artf.poloa.utility.Constant;
-import com.artf.poloa.utility.Mode;
-import com.artf.poloa.utility.Settings;
+import com.artf.poloa.presenter.utility.Constant;
+import com.artf.poloa.presenter.utility.Mode;
+import com.artf.poloa.presenter.utility.Settings;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;
-import java.util.Random;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -231,13 +230,13 @@ public class ManagerThread extends Service implements ManagerMVP.Thread, Manager
 
             if (exitS1 || exitS2) {
 
-                if (to.rmiSingal - to.rmiValue > Settings.RMI.SIGNAL_OVER_RMI) {
+                if (to.rmiSingal - to.rmiValue > Settings.RMI.SIGNAL_OVER_RMI || exitS2) {
                     double rateForSell = to.lastValueCC - (to.lastValueCC * 0.01);
                     presenter.sell(Constant.FILL_OR_KILL, ccName, rateForSell, to.balanceSelectedCC);
                 }
             }
-
         }
+
     }
 
     @Nullable
@@ -246,8 +245,8 @@ public class ManagerThread extends Service implements ManagerMVP.Thread, Manager
         return mBinder;
     }
 
-    public int getRandomNumber() {
-        return new Random().nextInt(100);
+    public HashMap<String, TradeObject> getCcMap() {
+        return ccMap;
     }
 
     public class LocalBinder extends Binder {

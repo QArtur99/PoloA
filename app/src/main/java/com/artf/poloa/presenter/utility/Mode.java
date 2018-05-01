@@ -1,4 +1,4 @@
-package com.artf.poloa.utility;
+package com.artf.poloa.presenter.utility;
 
 
 public enum Mode {

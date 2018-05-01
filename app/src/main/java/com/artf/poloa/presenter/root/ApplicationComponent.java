@@ -1,6 +1,6 @@
 package com.artf.poloa.presenter.root;
 
-import com.artf.poloa.MainActivity;
+import com.artf.poloa.view.activity.MainActivity;
 import com.artf.poloa.data.network.RetrofitModule;
 import com.artf.poloa.presenter.ema.EmaModule;
 import com.artf.poloa.presenter.manager.ManagerModule;

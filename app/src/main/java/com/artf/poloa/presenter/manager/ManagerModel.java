@@ -15,7 +15,6 @@ public class ManagerModel implements ManagerMVP.Model {
         this.repositoryRetrofit = repositoryRetrofit;
     }
 
-
     @Override
     public Observable<WrapJSONObject> returnBalances() {
         return repositoryRetrofit.returnBalances();

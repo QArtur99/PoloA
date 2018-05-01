@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.artf.poloa.data.entity.TradeObject;
-import com.artf.poloa.utility.Settings;
+import com.artf.poloa.presenter.utility.Settings;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 

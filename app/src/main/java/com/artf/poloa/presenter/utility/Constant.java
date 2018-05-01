@@ -1,7 +1,10 @@
-package com.artf.poloa.utility;
+package com.artf.poloa.presenter.utility;
+
+import java.text.DecimalFormat;
 
 public class Constant {
-
+    public static final DecimalFormat decimalFormat = new DecimalFormat("##.##");
+    public static final DecimalFormat decimalFormatEight = new DecimalFormat("##.########");
     public static final String BTC_NAME = "BTC";
     public static final String FILL_OR_KILL = "fillOrKill";
     public static final String POST_ONLY = "postOnly";

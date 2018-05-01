@@ -4,9 +4,6 @@ import android.support.annotation.Nullable;
 
 import com.artf.poloa.data.entity.WrapJSONArray;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import io.reactivex.Scheduler;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.CompositeDisposable;
@@ -28,11 +25,11 @@ public class RmiPresenter implements RmiMVP.Presenter {
 
     @Override
     public void returnChartData(String ccName, int timePeriod) {
-        if(scheduler == null) {
-            int threadCount = Runtime.getRuntime().availableProcessors();
-            ExecutorService threadPoolExecutor = Executors.newFixedThreadPool(threadCount);
-            scheduler = Schedulers.from(threadPoolExecutor);
-        }
+//        if(scheduler == null) {
+//            int threadCount = Runtime.getRuntime().availableProcessors();
+//            ExecutorService threadPoolExecutor = Executors.newFixedThreadPool(threadCount);
+//            scheduler = Schedulers.from(threadPoolExecutor);
+//        }
 
         DisposableObserver<WrapJSONArray> disposableObserver = model.returnChartData(ccName, timePeriod).observeOn(Schedulers.io()).
                 subscribeOn(Schedulers.io()).subscribeWith(new DisposableObserver<WrapJSONArray>() {

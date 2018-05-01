@@ -2,23 +2,48 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/mainActivityFrame"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.artf.poloa.MainActivity">
+    android:background="@color/colorWhite"
+    tools:context="com.artf.poloa.view.activity.MainActivity">
 
     <Button
         android:id="@+id/startButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Start"
+        android:layout_margin="4dp"
+        android:textSize="16sp"
+        android:textColor="@color/colorWhite"
+        android:background="@drawable/shape_button"
         android:textAllCaps="false"/>
 
     <Button
-        android:id="@+id/isAlive"
+        android:id="@+id/loadData"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/startButton"
-        android:text="isAlive?"
+        android:text="Load data"
+        android:layout_margin="4dp"
+        android:textSize="16sp"
+        android:textColor="@color/colorWhite"
+        android:background="@drawable/shape_button"
         android:textAllCaps="false"/>
+
+    <FrameLayout
+        android:id="@+id/ccMapViewFrame"
+        android:background="@color/colorAccent"
+        android:layout_below="@id/loadData"
+        android:layout_alignBottom="@+id/loadData"
+        android:layout_alignParentBottom="true"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center_vertical"
+        android:clipToPadding="true"
+        android:fillViewport="true"
+        android:scaleType="centerInside"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
 </RelativeLayout>

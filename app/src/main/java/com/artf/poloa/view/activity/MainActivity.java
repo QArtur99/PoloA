@@ -1,36 +1,44 @@
-package com.artf.poloa;
+package com.artf.poloa.view.activity;
 
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.os.Bundle;
 import android.os.IBinder;
-import android.support.v7.app.AppCompatActivity;
+import android.support.design.widget.Snackbar;
 import android.util.Log;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.artf.poloa.R;
 import com.artf.poloa.data.database.Utility;
 import com.artf.poloa.data.entity.TradeObject;
+import com.artf.poloa.data.entity.WrapDetailsData;
 import com.artf.poloa.presenter.manager.ManagerMVP;
 import com.artf.poloa.presenter.manager.ManagerThread;
-import com.artf.poloa.utility.Settings;
+import com.artf.poloa.presenter.utility.Settings;
+import com.artf.poloa.view.fragment.CcListFragment;
+import com.artf.poloa.view.utility.Navigation;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 
-import butterknife.ButterKnife;
+import butterknife.BindView;
 import butterknife.OnClick;
 
-public class MainActivity extends AppCompatActivity implements ManagerMVP.View {
+import static com.artf.poloa.view.utility.Navigation.startCommentsActivity;
 
+public class MainActivity extends BaseActivity implements ManagerMVP.View, CcListFragment.CcListFragmentInt {
 
     ManagerMVP.ThreadReceiver managerService;
     boolean mBound = false;
+    @BindView(R.id.mainActivityFrame) RelativeLayout mainActivityFrame;
+    private CcListFragment ccListFragment;
     /**
      * Defines callbacks for service binding, passed to bindService()
      */
@@ -51,11 +59,20 @@ public class MainActivity extends AppCompatActivity implements ManagerMVP.View {
     };
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        ButterKnife.bind(this);
+    public int getContentLayout() {
+        return R.layout.activity_main;
+    }
+
+    @Override
+    public void initNavigation() {
+
+    }
+
+    @Override
+    public void initComponents() {
+        loadStartFragment();
         //this.deleteDatabase("PoloA.db");
+        super.setResult(0);
     }
 
     @Override
@@ -75,7 +92,8 @@ public class MainActivity extends AppCompatActivity implements ManagerMVP.View {
             }
         }
 
-        Set<String> keys2 = ccMap2.keySet();
+        Set<String> keys2 = new HashSet<>();
+        keys2.addAll(ccMap2.keySet());
         for (String key : keys2) {
             if (!ccMap.containsKey(key)) {
                 ccMap2.remove(key);
@@ -103,14 +121,33 @@ public class MainActivity extends AppCompatActivity implements ManagerMVP.View {
         return false;
     }
 
-    @OnClick(R.id.isAlive)
-    public void isAlive() {
+    @OnClick(R.id.loadData)
+    public void loadDataFromService() {
         if (isMyServiceRunning(ManagerThread.class) && mBound) {
-            int num = managerService.getRandomNumber();
-            Toast.makeText(this, "isAlive: true" + num, Toast.LENGTH_LONG).show();
+            HashMap<String, TradeObject> ccMap = managerService.getCcMap();
+            if (ccMap != null) {
+                ccListFragment.setCcData(ccMap);
+            } else {
+                // ccListFragment.setRefreshing(false);
+                loginFailed();
+            }
         } else {
-            Toast.makeText(this, "isAlive: false", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Data load failed", Toast.LENGTH_LONG).show();
         }
+    }
+
+    public void loadStartFragment() {
+        ccListFragment = new CcListFragment();
+        Navigation.setFragmentFrame(this, R.id.ccMapViewFrame, ccListFragment);
+    }
+
+    private void loginFailed() {
+        Snackbar snackbar = Snackbar
+                .make(mainActivityFrame, "Trading system isn't turned on!", Snackbar.LENGTH_LONG)
+                .setAction("Turn on!", view -> {
+                    startButton();
+                });
+        snackbar.show();
     }
 
     @Override
@@ -128,6 +165,18 @@ public class MainActivity extends AppCompatActivity implements ManagerMVP.View {
         super.onStop();
         unbindService(mConnection);
         mBound = false;
+    }
+
+    @Override
+    public void loadData() {
+        loadDataFromService();
+    }
+
+    @Override
+    public void setDetails(String coinName, TradeObject tradeObject) {
+        WrapDetailsData wrapDetailsData = new WrapDetailsData(coinName, tradeObject);
+        String wrapDetailsDataString = new Gson().toJson(wrapDetailsData);
+        startCommentsActivity(this, wrapDetailsDataString);
     }
 
 }

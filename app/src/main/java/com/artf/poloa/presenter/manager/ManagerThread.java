@@ -137,7 +137,8 @@ public class ManagerThread extends Service implements ManagerMVP.Thread, Manager
             } else {
                 ccMap.get(key).tradeMode = Mode.BUY;
             }
-            //startBot(key, ccMap.get(key));
+
+            startBot(key, ccMap.get(key));
 
             try {
                 Thread.sleep(1001L);
@@ -174,30 +175,13 @@ public class ManagerThread extends Service implements ManagerMVP.Thread, Manager
     }
 
     @Override
-    public void erorrBuy() {
-//        new Timer().schedule(new TimerTask() {
-//            @Override
-//            public void run() {
-//                presenter.returnBalances();
-//            }
-//        }, 1000);
-    }
+    public void erorrBuy() {}
 
     @Override
-    public void sell(JsonObject jsonArray) {
-
-    }
+    public void sell(JsonObject jsonArray) {}
 
     @Override
-    public void erorrSell() {
-//        new Timer().schedule(new TimerTask() {
-//            @Override
-//            public void run() {
-//                presenter.returnBalances();
-//            }
-//        }, 1000);
-
-    }
+    public void erorrSell() {}
 
     private void startBot(String ccName, TradeObject to) {
         double sellLock = to.rateOfLastBuy + (to.rateOfLastBuy * Settings.Trade.SELL_IF_RAISED_PERCENTAGE / 100);
@@ -223,7 +207,7 @@ public class ManagerThread extends Service implements ManagerMVP.Thread, Manager
             if (Settings.Trade.CAN_I_LOSE) {
                 exitS1 = to.rmiValue > Settings.RMI.OVER_BOUGHT;
                 exitS2 = sellLock2 > to.lastValueCC && to.rmiValue > Settings.Trade.OVER_BOUGHT_SELL_IF_DROPPED_PERCENTAGE;
-            }else {
+            } else {
                 exitS1 = to.lastValueCC < sellLock;
                 exitS2 = false;
             }

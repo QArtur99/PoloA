@@ -138,7 +138,7 @@ public class ManagerThread extends Service implements ManagerMVP.Thread, Manager
                 ccMap.get(key).tradeMode = Mode.BUY;
             }
 
-            startBot(key, ccMap.get(key));
+//            startBot(key, ccMap.get(key));
 
             try {
                 Thread.sleep(1001L);

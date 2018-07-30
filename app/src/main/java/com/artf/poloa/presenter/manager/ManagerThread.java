@@ -214,7 +214,7 @@ public class ManagerThread extends Service implements ManagerMVP.Thread, Manager
 
             if (exitS1 || exitS2) {
 
-                if (to.rmiSingal - to.rmiValue > Settings.RMI.SIGNAL_OVER_RMI || exitS2) {
+                if (to.rmiSingal - to.rmiValue > Settings.RMI.SIGNAL_OVER_RMI) {
                     double rateForSell = to.lastValueCC - (to.lastValueCC * 0.01);
                     presenter.sell(Constant.FILL_OR_KILL, ccName, rateForSell, to.balanceSelectedCC);
                 }

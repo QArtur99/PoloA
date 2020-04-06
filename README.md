@@ -2,7 +2,7 @@
 PolaA is a automated trading system for Poloniex cryptocurrency exchange platform. It is multithreaded application built with Dagger2, Retrofit2, RxJava2. Trading strategy of this system base on technical indicators such as EMA(Exponential Moving Average) and RMI(Relative Momentum Index)
 
 ### Screenshots
-![screenshots](https://raw.githubusercontent.com/QArtur99/PoloA/master/screenshot/3_screen.png | width=48)
+![screenshots](https://raw.githubusercontent.com/QArtur99/PoloA/master/screenshot/3_screen.png)
 
 ### How to run the project in development mode
 * Clone or download repository as a zip file.
